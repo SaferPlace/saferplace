@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"safer.place/internal/address/roughprefix"
 	"safer.place/internal/language"
 	"safer.place/internal/web"
 )
@@ -68,6 +69,9 @@ func run() error {
 		return fmt.Errorf("unable to load languages: %w", err)
 	}
 
+	// For now we just want something, we don't care what
+	addrResolver := roughprefix.New()
+
 	meta := Meta{}
 
 	langInfo := make([]language.Info, 0, len(langs))
@@ -117,11 +121,16 @@ func run() error {
 	})
 	r.GET("/search", func(c *gin.Context) {
 		res := prepResp(c)
+
+		address, x, y, err := addrResolver.Resolve(res.InputValue)
+		if err != nil {
+			log.Printf("unable to resolve: %v", err)
+		}
 		c.HTML(http.StatusOK, "details.html", DetailsResponse{
 			Response:     res,
-			Address:      "TEST ADDRESS",
-			CoordX:       53.42737,
-			CoordY:       -6.24611,
+			Address:      address,
+			CoordX:       x,
+			CoordY:       y,
 			RoundedScore: 4,
 			TrueScore:    4.20,
 		})
