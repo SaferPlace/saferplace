@@ -1,0 +1,12 @@
+{{ template "_header.html" . }}
+
+<ul class="list tl pl0 w-50 center">
+    {{ range .AboutQandA }}
+    <li>
+        <p class="b">{{ .Question }}</p>
+        <p>{{ .Answer | html }}</p>
+    </li>
+    {{ end }}
+</ul>
+
+{{ template "_footer.html" . }}

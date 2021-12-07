@@ -1,0 +1,70 @@
+{{ template "_header.html" . }}
+
+<p><span class="b">{{ .ActualAddressLabel }}</span>: {{ .Address }}</p>
+<p><span class="b">{{ .CoordinateLabel }}</span>: {{ printf "%.3f" .CoordX }}, {{ printf "%.3f" .CoordY }}</p>
+<br/>
+<p><span class="b">{{ .SafetyScoreLabel }}</span>:</p>
+<p class="ma0 f1">
+    <span 
+    {{ if le .RoundedScore 2 }} style="color:#f00"
+    {{ else if eq .RoundedScore 3 }} class="orange"
+    {{ else }} class="green"{{ end }}>
+        {{ range times .RoundedScore }}
+            &#9733;
+        {{ end }}
+        {{ range $idx := subtract 5 .RoundedScore | times }}
+            &#9734;
+        {{ end }}
+        <br>({{ printf "%.2f" .TrueScore }})
+    </span></p>
+    
+<p>{{ .SafetyScoreDescription }}</p><br/>
+<p><span class="b">{{ .UniversityDistanceLabel }}</span>
+<select id="uni-select">
+{{ range $name, $time := .DistanceToUniversities }}
+    <option value="{{ $time }}" data-dist="{{ $time }}">{{ $name }}</option>
+{{ end }}
+</select>:  
+<span id="uni-distance"></span></p><br/><br/>
+<script type="text/javascript">
+    const distSpan = document.getElementById("uni-distance");
+    const uniSelect = document.getElementById("uni-select");
+    const setDistSpan = function() {
+        const index = uniSelect.selectedIndex;
+        const chosenOption = uniSelect.options[index];
+        distSpan.innerHTML = chosenOption.getAttribute("data-dist");
+    }
+    setDistSpan();
+    uniSelect.addEventListener("change", setDistSpan);
+</script>
+<script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+<link href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" rel="stylesheet"/>
+<div id="osm-map" class="mb3"></div>
+<br/>
+<script type="text/javascript">
+    // Where you want to render the map.
+    var element = document.getElementById('osm-map');
+
+    // Height has to be set. You can do this in CSS too.
+    element.style = 'text-align: center; margin: auto; height:500px; max-width: 800px';
+
+    // Create Leaflet map on map element.
+    var map = L.map(element);
+
+    // Add OSM tile leayer to the Leaflet map.
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Target's GPS coordinates.
+    //var target = L.latLng('47.50737', '19.04611');
+    var target = L.latLng('{{ .CoordX }}', '{{ .CoordY }}');
+
+    // Set map's center to target with zoom 14.
+    map.setView(target, 20);
+
+    // Place a marker on the same location.
+    L.marker(target).addTo(map);
+</script>
+
+{{ template "_footer.html" . }}

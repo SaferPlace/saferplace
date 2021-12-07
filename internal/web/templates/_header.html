@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html style="height: 100%;" lang="{{ .Lang }}">
+<head>
+  <meta charset="utf-8">
+  <title>Safer.Place</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/tachyons@4.5.3/css/tachyons.min.css"/>
+  <link href="https://fonts.googleapis.com/css?family={{ .Meta.NormalFont }}|{{ .Meta.FancyFont }}" rel="stylesheet">
+  <!-- Tracking script removed for now -->
+</head>
+<body class="flex flex-column pa0 ma0" style="height: 100%; margin: 0;">
+<header class="white bg-blue pa4 ma0 tc" style="font-family: '{{ .Meta.NormalFont }}', cursive;">
+  <a href="/?lang={{ .Lang }}" class="link"><h1 class="f1 b ma0 no-underline white">Safer.Place</h1></a>
+  <nav class="list f4 b ma3">
+    {{ range .Meta.Languages }}
+    <a href="/about?lang={{ .Code }}" class="link white ma3">{{ .Name }}</a> 
+    {{ end }}
+  </nav>
+  <div class="bg-blue tc flex justify-center">
+    <form action="search" class="mt3 mh0 w-50 shadow-3-l flex cf br2 bg-white">
+      <i class="material-icons f3 pl3 pt3 gray">search</i>
+      <input name="q" value="{{ .InputValue }}" placeholder="{{ .PlaceEnterLabel }}" class="bn f3 pa3 w-90 border-box input-reset outline-0">
+      <input type="hidden" name="lang" value="{{ .Lang }}"></input>
+      <button type="submit" class="bn f2 pa2 button-reset bg-white br2 h-100 br--right self-end pointer outline-0"><i class="material-icons">arrow_forward</i></input>
+    </form>
+  </div>
+</header>
+<section id="contentdiv" class="h-100 tc f4 lh-title" style="font-family: '{{ .Meta.NormalFont }}', serif;">
