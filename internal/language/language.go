@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
+	"reflect"
 
 	"gopkg.in/yaml.v2"
 )
@@ -59,6 +60,15 @@ func Languages() (map[Info]Language, error) {
 		if err := yaml.NewDecoder(f).Decode(&data); err != nil {
 			return nil, fmt.Errorf("unable to decode %q: %w", file.Name(), err)
 		}
+
+		// Check are all fields specified
+		v := reflect.ValueOf(data.Values)
+		for i := 0; i < v.NumField(); i++ {
+			if field := v.Field(i); field.IsZero() {
+				return nil, fmt.Errorf("empty value %s.%s", data.Info.Code, v.Type().Field(i).Name)
+			}
+		}
+
 		langs[data.Info] = data.Values
 	}
 
