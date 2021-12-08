@@ -10,6 +10,7 @@ env:
   docker_username: VoyTechnology
   docker_image: ghcr.io/saferplace/saferplace
   docker_platforms: linux/amd64,linux/arm64
+  go_version: '1.17'
 
 jobs:
   test:
@@ -17,6 +18,8 @@ jobs:
     steps:
     - name: Install Go
       uses: actions/setup-go@v2
+      with:
+        go-version: ${{ env.go_version }}
 
     - name: Checkout
       uses: actions/checkout@v2
