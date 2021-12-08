@@ -107,17 +107,27 @@ func run() error {
 		}
 	}
 
-	scoreForCoordinates := func(x, y float64) float64 {
-		nearest := stations.Nearest(x, y, 3)
+	// Precompute the safest and most dangerous stations
+	min, max := stations.SafestAndDangerousScores(5)
 
-		log.Println("nearest:", nearest)
+	const nearestCount = 3
+
+	scoreForCoordinates := func(x, y float64, years int) float64 {
+		// TODO: Improve this algorithm. For now we get the safest location
+		//	     and the worst location, and the score would fall somewhere
+		//       in between. But we are definatelly calculating it wrong.
+		nearest := stations.Nearest(x, y, nearestCount)
 
 		sum := 0.0
 		for _, s := range nearest {
-			sum += s.ScoreAverage(5)
+			sum += s.ScoreAverage(years)
 		}
-		// TODO: Add weights etc, but for now we just cap it at 5
-		return math.Min(sum, 5)
+		avg := sum / nearestCount
+
+		// Score between 1-5
+		score := 1 + ((avg - min) / (max - min) * 4)
+
+		return score
 	}
 
 	r.SetFuncMap(templateFuncs)
@@ -144,7 +154,7 @@ func run() error {
 		if err != nil {
 			log.Printf("unable to resolve: %v", err)
 		}
-		score := scoreForCoordinates(x, y)
+		score := scoreForCoordinates(x, y, 5)
 		c.HTML(http.StatusOK, "details.html", DetailsResponse{
 			Response:     res,
 			Address:      address,

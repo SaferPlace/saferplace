@@ -2,6 +2,7 @@ package stations
 
 import (
 	"log"
+	"math"
 	"sort"
 
 	"safer.place/data"
@@ -26,8 +27,8 @@ func New() *Stations {
 		// but we provide coordinates as 0,0 since we have no idea where it is
 		s, exists := ss.stations[name]
 		if !exists {
-			s = newStation(name, 0, 0)
-			log.Printf("no coordinates for %q, new station created", s)
+			log.Printf("no coordinates for %q, skipping", name)
+			continue
 		}
 		s.crimes = crimes
 		ss.stations[name] = s
@@ -49,7 +50,34 @@ func (s *Stations) Nearest(x, y float64, n int) []*Station {
 	sort.Sort(bd)
 
 	return bd.stations[:n]
+}
 
+// SafestAndDangerousScores gets the safest and most most dangerous score
+func (s *Stations) SafestAndDangerousScores(years int) (float64, float64) {
+	min, max := math.Inf(1), 0.0
+	minName, maxName := "", ""
+	for _, s := range s.stations {
+		score := s.ScoreAverage(years)
+		// Somehow ignore the 0.0, no idea why its showing up.
+		if score < 0.01 {
+			continue
+		}
+		if score < min {
+			min = score
+			minName = s.Name
+			continue
+		}
+		if max < score {
+			max = score
+			maxName = s.Name
+			continue
+		}
+	}
+
+	log.Printf("Safest: %q (%.2f) - Most Dangerous: %q (%.2f)",
+		minName, min, maxName, max)
+
+	return min, max
 }
 
 type ByDistance struct {

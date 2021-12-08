@@ -117,7 +117,7 @@ type CrimeType string
 
 var (
 	// MurderAndAssaultCrime 2004 - 2016
-	MurderAndAssaultCrime CrimeType = "Attempts or threats to murder, assaults, harassments and related offences 2004"
+	MurderAndAssaultCrime CrimeType = "Attempts or threats to murder, assaults, harassments and related offences"
 	// DangerousActsCrime 2003 - 2016
 	DangerousActsCrime CrimeType = "Dangerous or negligent acts"
 	// KidnappingCrime 2003-2016
@@ -163,21 +163,19 @@ func parseGardaCrimes() error {
 		station := line[1]
 
 		vs := matoi(line[5:])
-
 		gardaCrimes[station] = CrimesPerType{
-			MurderAndAssaultCrime: CrimesInYear{
-				2003: vs[0],
-				2004: vs[1],
-				2005: vs[2],
-				2006: vs[3],
-				2007: vs[4],
-				2008: vs[5],
-				2009: vs[6],
-				2010: vs[7],
-				2011: vs[8],
-				2012: vs[9],
-				2013: vs[10],
-			},
+			MurderAndAssaultCrime: mapToYear(vs[0:13], 2004),
+			DangerousActsCrime:    mapToYear(vs[13:27], 2003),
+			KidnappingCrime:       mapToYear(vs[27:41], 2003),
+			RobberyCrime:          mapToYear(vs[41:55], 2003),
+			BurglaryCrime:         mapToYear(vs[55:69], 2003),
+			TheftCrime:            mapToYear(vs[69:83], 2003),
+			FraudCrime:            mapToYear(vs[83:97], 2003),
+			DrugCrime:             mapToYear(vs[97:111], 2003),
+			WeaponsCrime:          mapToYear(vs[111:125], 2003),
+			PropertyDamageCrime:   mapToYear(vs[125:139], 2003),
+			PublicOrderCrime:      mapToYear(vs[139:153], 2003),
+			OrganisedCrime:        mapToYear(vs[153:167], 2003),
 		}
 	}
 
@@ -199,4 +197,12 @@ func matoi(in []string) []int {
 		out[i] = v
 	}
 	return out
+}
+
+func mapToYear(in []int, startYear int) CrimesInYear {
+	res := make(CrimesInYear, len(in))
+	for i, v := range in {
+		res[startYear+i] = v
+	}
+	return res
 }

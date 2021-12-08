@@ -37,7 +37,7 @@ func newStation(name string, x, y float64) *Station {
 		s.violentCrimeAverage,
 		s.bulgaryAverage,
 		s.theftAverage,
-		s.roberyAverage,
+		s.robberyAverage,
 	}
 
 	return s
@@ -55,14 +55,15 @@ func (s *Station) theftAverage(years int) float64 {
 	return s.avgCrimes(s.crimes[data.TheftCrime], years)
 }
 
-func (s *Station) roberyAverage(years int) float64 {
+func (s *Station) robberyAverage(years int) float64 {
 	return s.avgCrimes(s.crimes[data.RobberyCrime], years)
 }
 
 func (s *Station) ScoreAverage(years int) float64 {
 	sum := 0.0
 	for _, marker := range s.markerFns {
-		sum += marker(years)
+		ca := marker(years)
+		sum += ca
 	}
 	return sum / float64(len(s.markerFns))
 }
