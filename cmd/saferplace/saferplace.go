@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"math"
 	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"safer.place/internal/address/roughprefix"
 	"safer.place/internal/language"
+	"safer.place/internal/stations"
 	"safer.place/internal/web"
 )
 
@@ -82,6 +84,9 @@ func run() error {
 	}
 	meta.Languages = langInfo
 
+	// station locations
+	stations := stations.New()
+
 	prepResp := func(c *gin.Context) Response {
 		var req SearchRequest
 		if err := c.ShouldBind(&req); err != nil {
@@ -100,6 +105,19 @@ func run() error {
 			InputValue: req.Input,
 			Language:   langs[codeToInfo[req.Lang]],
 		}
+	}
+
+	scoreForCoordinates := func(x, y float64) float64 {
+		nearest := stations.Nearest(x, y, 3)
+
+		log.Println("nearest:", nearest)
+
+		sum := 0.0
+		for _, s := range nearest {
+			sum += s.ScoreAverage(5)
+		}
+		// TODO: Add weights etc, but for now we just cap it at 5
+		return math.Min(sum, 5)
 	}
 
 	r.SetFuncMap(templateFuncs)
@@ -126,13 +144,14 @@ func run() error {
 		if err != nil {
 			log.Printf("unable to resolve: %v", err)
 		}
+		score := scoreForCoordinates(x, y)
 		c.HTML(http.StatusOK, "details.html", DetailsResponse{
 			Response:     res,
 			Address:      address,
 			CoordX:       x,
 			CoordY:       y,
-			RoundedScore: 4,
-			TrueScore:    4.20,
+			RoundedScore: int(math.Round(score)),
+			TrueScore:    score,
 		})
 	})
 

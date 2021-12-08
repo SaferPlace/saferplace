@@ -10,7 +10,7 @@ import (
 )
 
 type Resolver struct {
-	prefixes map[string]data.PrefixCoordinates
+	prefixes map[string]data.NamedCoordinates
 }
 
 func New() *Resolver {
