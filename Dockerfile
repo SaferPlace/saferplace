@@ -1,4 +1,4 @@
-#syntax 
+#syntax
 FROM golang:1.17-alpine AS builder
 
 WORKDIR /src
@@ -8,8 +8,8 @@ COPY . .
 
 RUN go mod download
 
-ARG TARGETOS=linux
-ARG TARGETARCH=amd64
+ARG TARGETOS
+ARG TARGETARCH
 
 RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /bin/saferplace ./cmd/saferplace
 
