@@ -1,11 +1,14 @@
 {{ template "_header.html" . }}
 
+{{ if not .Address }}
+{{ .AddressNotFound }}
+{{ else }}
 <p><span class="b">{{ .ActualAddressLabel }}</span>: {{ .Address }}</p>
 <p><span class="b">{{ .CoordinateLabel }}</span>: {{ printf "%.3f" .CoordX }}, {{ printf "%.3f" .CoordY }}</p>
 <br/>
 <p><span class="b">{{ .SafetyScoreLabel }}</span>:</p>
 <p class="ma0 f1">
-    <span 
+    <span
     {{ if le .RoundedScore 2 }} style="color:#f00"
     {{ else if eq .RoundedScore 3 }} class="orange"
     {{ else }} class="green"{{ end }}>
@@ -15,16 +18,16 @@
         {{ range $idx := subtract 5 .RoundedScore | times }}
             &#9734;
         {{ end }}
-        <br>({{ printf "%.2f" .TrueScore }})
+        <br>({{ printf "%.2f" .Score }})
     </span></p>
-    
+
 <p>{{ .SafetyScoreDescription }}</p><br/>
 <p><span class="b">{{ .UniversityDistanceLabel }}</span>
 <select id="uni-select">
 {{ range $name, $time := .DistanceToUniversities }}
     <option value="{{ $time }}" data-dist="{{ $time }}">{{ $name }}</option>
 {{ end }}
-</select>:  
+</select>:
 <span id="uni-distance"></span></p><br/><br/>
 <script type="text/javascript">
     const distSpan = document.getElementById("uni-distance");
@@ -66,5 +69,6 @@
     // Place a marker on the same location.
     L.marker(target).addTo(map);
 </script>
+{{ end }}
 
 {{ template "_footer.html" . }}

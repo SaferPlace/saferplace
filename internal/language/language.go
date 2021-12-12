@@ -30,7 +30,8 @@ type Language struct {
 
 	AboutQandA []QandA `yaml:"about_q_and_a"`
 
-	// Details Page
+	// Search Page
+	AddressNotFound         string `yaml:"address_not_found"`
 	ActualAddressLabel      string `yaml:"actual_address_label"`
 	CoordinateLabel         string `yaml:"coordinate_label"`
 	SafetyScoreLabel        string `yaml:"safety_score_label"`
