@@ -18,7 +18,6 @@ env:
   TF_VAR_datacenters:   ${{ secrets.NOMAD_DATACENTERS }}
   TF_VAR_namespace:     ${{ secrets.NOMAD_NAMESPACE }}
   TF_VAR_image:         # Deducted from docker steps
-  TF_VAR_service_tags:  ${{ secrets.NOMAD_SERVICE_TAGS }}
 
 jobs:
   test:

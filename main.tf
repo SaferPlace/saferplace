@@ -40,6 +40,7 @@ variable "image" {
 variable "tags" {
   description = "List of service tags"
   type        = list(string)
+  default     = []
 }
 
 provider "nomad" {
