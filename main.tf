@@ -3,7 +3,7 @@
 terraform {
   # TODO: Eventually migrate to cloud block
   backend "remote" {
-    hostname = "app.terraform.io"
+    hostname     = "app.terraform.io"
     organization = "saferplace"
 
     workspaces {
@@ -13,8 +13,8 @@ terraform {
 }
 
 variable "nomad_address" {
-    description = "Nomad address"
-    type        = string
+  description = "Nomad address"
+  type        = string
 }
 
 variable "region" {
@@ -47,11 +47,11 @@ provider "nomad" {
 }
 
 module "saferplace" {
-    source = "./deploy/terraform-nomad"
+  source = "./deploy/terraform-nomad"
 
-    region      = var.region
-    datacenters = var.datacenters
-    namespace   = var.namespace
-    image       = var.image
-    tags        = var.tags
+  region      = var.region
+  datacenters = var.datacenters
+  namespace   = var.namespace
+  image       = var.image
+  tags        = var.tags
 }
