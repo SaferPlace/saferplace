@@ -8,6 +8,11 @@ variable "datacenters" {
   type        = list(string)
 }
 
+variable "namespace" {
+  description = "Deployment namespace"
+  type        = string
+}
+
 variable "image" {
   description = "Deployment image"
   type        = string
