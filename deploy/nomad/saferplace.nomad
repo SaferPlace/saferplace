@@ -7,7 +7,7 @@ variable "region" {
 variable "datacenters" {
   description = "List of datacenters in the region to deploy to"
   type        = list(string)
-  default     = ["dub1"]
+  default     = ["dc1"]
 }
 
 variable "namespace" {

@@ -15,7 +15,13 @@ resource "nomad_job" "saferplace" {
       "datacenters"  = var.datacenters,
       "namespace"    = var.namespace,
       "image"        = var.image,
-      "service_tags" = var.tags,
+
     }
+
+    # This is not working for some reason, so for now we will hardcode the
+    # service tags inside the job.
+    # vars {
+    #   "service_tags" = var.tags,
+    # }
   }
 }
