@@ -48,7 +48,7 @@ provider "nomad" {
 }
 
 module "saferplace" {
-  source = "./deploy/terraform-nomad"
+  source = "./deploy/terraform"
 
   region      = var.region
   datacenters = var.datacenters
