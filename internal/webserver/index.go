@@ -14,7 +14,7 @@ func (s *WebServer) index(c *gin.Context) {
 		if errors.As(err, &serr) {
 			c.HTML(serr.Code, "error.html", serr)
 		} else {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
 		}
 		return
 	}

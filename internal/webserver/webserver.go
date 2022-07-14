@@ -42,8 +42,7 @@ func New(opts ...Option) *WebServer {
 }
 
 func (s *WebServer) Run(port int) error {
-	s.router.Run(fmt.Sprintf(":%d", port)) // Seems stupid
-	return nil
+	return s.router.Run(fmt.Sprintf(":%d", port))
 }
 
 // Request contains the common fields which might be present in every request.
