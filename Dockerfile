@@ -16,7 +16,10 @@ RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /bin/saferplace ./cmd/safe
 ######################
 FROM scratch AS target
 
+ENV PORT=8080
 ENV GIN_MODE=release
+
+EXPOSE ${PORT}
 
 COPY --from=builder /bin/saferplace /bin/saferplace
 
