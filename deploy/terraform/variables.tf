@@ -17,8 +17,3 @@ variable "image" {
   description = "Deployment image"
   type        = string
 }
-
-variable "tags" {
-  description = "List of service tags"
-  type        = list(string)
-}

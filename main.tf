@@ -37,12 +37,6 @@ variable "image" {
   type        = string
 }
 
-variable "tags" {
-  description = "List of service tags"
-  type        = list(string)
-  default     = []
-}
-
 provider "nomad" {
   address = var.nomad_address
 }
@@ -54,5 +48,4 @@ module "saferplace" {
   datacenters = var.datacenters
   namespace   = var.namespace
   image       = var.image
-  tags        = var.tags
 }
