@@ -5,7 +5,7 @@ resource "nomad_namespace" "saferplace" {
 
 module "saferplace" {
   source  = "Voytechnology/generic/nomad"
-  version = "0.0.2"
+  version = "0.0.3"
 
   job_name    = "saferplace"
   namespace   = var.namespace
@@ -19,6 +19,8 @@ module "saferplace" {
       static = 0
     }
   }
+  docker_username = "Voytechnology"
+  docker_password = var.docker_password
 
   service_port = "http"
   service_tags = [

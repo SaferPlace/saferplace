@@ -11,11 +11,12 @@ env:
   DOCKER_PLATFORM: linux/amd64,linux/arm64
 
   # Terraform variables
-  TF_VAR_nomad_address: ${{ secrets.NOMAD_ADDR }}
-  TF_VAR_region:        ${{ secrets.NOMAD_REGION }}
-  TF_VAR_datacenters:   ${{ secrets.NOMAD_DATACENTERS }}
-  TF_VAR_namespace:     saferplace
-  TF_VAR_image:         ghcr.io/saferplace/saferplace:${{ github.sha }} # TODO: deduct from docker steps
+  TF_VAR_nomad_address:   ${{ secrets.NOMAD_ADDR }}
+  TF_VAR_region:          ${{ secrets.NOMAD_REGION }}
+  TF_VAR_datacenters:     ${{ secrets.NOMAD_DATACENTERS }}
+  TF_VAR_docker_password: ${{ secrets.DOCKER_READ_TOKEN }}
+  TF_VAR_namespace:       saferplace
+  TF_VAR_image:           ghcr.io/saferplace/saferplace:${{ github.sha }} # TODO: deduct from docker steps
 
 jobs:
   vendor:

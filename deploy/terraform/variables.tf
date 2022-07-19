@@ -17,3 +17,9 @@ variable "image" {
   description = "Deployment image"
   type        = string
 }
+
+variable "docker_password" {
+  description = "Read only token for the container registry"
+  type        = string
+  sensitive   = true
+}

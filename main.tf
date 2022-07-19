@@ -15,6 +15,7 @@ terraform {
 variable "nomad_address" {
   description = "Nomad address"
   type        = string
+  sensitive   = true
 }
 
 variable "region" {
@@ -37,6 +38,12 @@ variable "image" {
   type        = string
 }
 
+variable "docker_password" {
+  description = "Read only token for the container registry"
+  type        = string
+  sensitive   = true
+}
+
 provider "nomad" {
   address = var.nomad_address
 }
@@ -44,8 +51,9 @@ provider "nomad" {
 module "saferplace" {
   source = "./deploy/terraform"
 
-  region      = var.region
-  datacenters = var.datacenters
-  namespace   = var.namespace
-  image       = var.image
+  region          = var.region
+  datacenters     = var.datacenters
+  namespace       = var.namespace
+  image           = var.image
+  docker_password = var.docker_password
 }
