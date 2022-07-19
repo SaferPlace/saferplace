@@ -9,6 +9,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 
 	"safer.place/internal/address"
+	"safer.place/internal/address/eircodesaferplace"
 	"safer.place/internal/address/roughprefix"
 	"safer.place/internal/language"
 	"safer.place/internal/score"
@@ -59,6 +60,11 @@ func run() error {
 		switch r {
 		case "roughprefix":
 			addrResolvers = append(addrResolvers, roughprefix.New())
+		case "eircode":
+			addrResolvers = append(addrResolvers, eircodesaferplace.New(
+				cfg.AddressResolvers.EircodeAddr,
+				cfg.AddressResolvers.EircodeToken,
+			))
 		}
 	}
 
@@ -96,6 +102,7 @@ type Config struct {
 }
 
 type AddressResolvers struct {
-	EircodeAddr string   `split_words:"true"`
-	Order       []string `split_words:"true" default:"roughprefix"`
+	EircodeAddr  string   `split_words:"true" default:"https://eircode.safer.place"`
+	EircodeToken string   `split_words:"true"`
+	Order        []string `default:"roughprefix"`
 }
