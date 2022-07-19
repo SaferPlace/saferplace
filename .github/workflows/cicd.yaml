@@ -114,13 +114,6 @@ jobs:
         platforms: ${{ env.DOCKER_PLATFORM }}
         tags: ${{ env.DOCKER_IMAGE}}:${{ github.ref_name }},${{ env.DOCKER_IMAGE}}:${{ github.sha }}
 
-    - uses: docker/build-push-action@v3
-      with:
-        platforms:
-        push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ steps.docker_meta.outputs.tags }}
-        labels: ${{ steps.docker_meta.outputs.labels }}
-
   prod_deploy:
     name: Deploy
     runs-on: ubuntu-latest
