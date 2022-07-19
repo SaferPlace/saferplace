@@ -31,7 +31,7 @@ func (s *WebServer) search(c *gin.Context) {
 		return
 	}
 
-	addr, x, y, err := s.addressResolver.Resolve(req.Query)
+	addr, x, y, err := s.resolve(req.Query)
 	// We want to skip the empty Unresolved, as this will mean the address
 	// is empty and it will be handed by the template
 	if err != nil && !errors.Is(err, address.ErrUnresolved) {
@@ -53,4 +53,14 @@ func (s *WebServer) search(c *gin.Context) {
 		Score:        score,
 		RoundedScore: int(math.Round(score)),
 	})
+}
+
+func (s *WebServer) resolve(q string) (string, float64, float64, error) {
+	for _, r := range s.addressResolvers {
+		if addr, x, y, err := r.Resolve(q); err == nil {
+			return addr, x, y, nil
+		}
+	}
+
+	return "", 0, 0, address.ErrUnresolved
 }

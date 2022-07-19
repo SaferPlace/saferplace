@@ -13,8 +13,8 @@ import (
 type WebServer struct {
 	router *gin.Engine
 
-	addressResolver address.Resolver
-	scorer          score.Scorer
+	addressResolvers []address.Resolver
+	scorer           score.Scorer
 
 	// prepared language information
 	languages       map[string]language.Language

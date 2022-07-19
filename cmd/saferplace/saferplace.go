@@ -43,6 +43,8 @@ func run() error {
 		return fmt.Errorf("unable to parse config: %w", err)
 	}
 
+	log.Printf("config: %+v", cfg)
+
 	var opts []webserver.Option
 
 	langs, err := language.Languages()
@@ -52,12 +54,15 @@ func run() error {
 	opts = append(opts, webserver.Languages(langs))
 
 	// For now we just want something, we don't care what
-	var addrResolver address.Resolver
-	switch cfg.AddressResolver {
-	case "roughprefix":
-		addrResolver = roughprefix.New()
+	var addrResolvers []address.Resolver
+	for _, r := range cfg.AddressResolvers.Order {
+		switch r {
+		case "roughprefix":
+			addrResolvers = append(addrResolvers, roughprefix.New())
+		}
 	}
-	opts = append(opts, webserver.AddressResolver(addrResolver))
+
+	opts = append(opts, webserver.AddressResolvers(addrResolvers...))
 
 	// Parse the templates
 	tmpl := template.Must(template.New("").
@@ -82,10 +87,15 @@ func run() error {
 }
 
 type Config struct {
-	Port            int    `envconfig:"PORT" default:"8080"`
-	AddressResolver string `split_words:"true" default:"roughprefix"`
-	Scorer          string `default:"v1"`
+	Port             int              `envconfig:"PORT" default:"8080"`
+	AddressResolvers AddressResolvers `split_words:"true"`
+	Scorer           string           `default:"v1"`
 
 	Font      string
 	FancyFont string `split_words:"true"`
+}
+
+type AddressResolvers struct {
+	EircodeAddr string   `split_words:"true"`
+	Order       []string `split_words:"true" default:"roughprefix"`
 }
