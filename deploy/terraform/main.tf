@@ -24,6 +24,7 @@ module "saferplace" {
 
   service_port = "http"
   service_tags = [
-    "traefik.http.routers.saferplace.rule=Host(`safer.place`)"
+    "traefik.http.routers.saferplace.rule=Host(`safer.place`)",
+    "prometheus.io/scrape=false"
   ]
 }
