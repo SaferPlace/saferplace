@@ -44,6 +44,13 @@ variable "docker_password" {
   sensitive   = true
 }
 
+variable "eircode_token" {
+  description = "Token used to authenticate to the eircode service"
+  type        = string
+  sensitive   = true
+}
+
+
 provider "nomad" {
   address = var.nomad_address
 }
@@ -56,4 +63,5 @@ module "saferplace" {
   namespace       = var.namespace
   image           = var.image
   docker_password = var.docker_password
+  eircode_token   = var.eircode_token
 }
