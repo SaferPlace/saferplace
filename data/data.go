@@ -10,7 +10,6 @@ import (
 )
 
 var initFuncs = []func() error{
-	parseRoughPrefixCoordinates,
 	parseGardaLocations,
 	parseGardaCrimes,
 }
@@ -23,53 +22,17 @@ func init() {
 	}
 }
 
-func parseRoughPrefixCoordinates() error {
-	records, err := csv.NewReader(
-		strings.NewReader(roughPrefixCoordinatesFile)).
-		ReadAll()
-	if err != nil {
-		return fmt.Errorf("unable to read rough prefix coordinates file: %w",
-			err)
-	}
-
-	roughPrefixCoordinates = make(map[string]NamedCoordinates, len(records))
-
-	for _, line := range records {
-		x, err := strconv.ParseFloat(line[2], 64)
-		if err != nil {
-			return fmt.Errorf("unable to parse X coordinate: %w", err)
-		}
-		y, err := strconv.ParseFloat(line[3], 64)
-		if err != nil {
-			return fmt.Errorf("unable to parse Y coordinate: %w", err)
-		}
-
-		roughPrefixCoordinates[line[0]] = NamedCoordinates{
-			Names: strings.Split(line[1], "|"),
-			Coordinates: Coordinates{
-				X: x,
-				Y: y,
-			},
-		}
-	}
-	return nil
-}
-
-//go:embed rough_prefix_coordinates.csv
-var roughPrefixCoordinatesFile string
-var roughPrefixCoordinates map[string]NamedCoordinates
-
+// Coordinates define the X and Y location, X being the lattitude and Y being
+// the longitude.
 type Coordinates struct {
 	X, Y float64
 }
 
+// NamedCoordinates are a set of coordinates with list of names associated with
+// it.
 type NamedCoordinates struct {
 	Names []string
 	Coordinates
-}
-
-func RoughPrefixCoordinates() map[string]NamedCoordinates {
-	return roughPrefixCoordinates
 }
 
 //go:embed garda_locations.csv
@@ -104,6 +67,8 @@ func parseGardaLocations() error {
 	return nil
 }
 
+// GardaLocations contains a list of names of the Garda stations and where they
+// are
 func GardaLocations() map[string]Coordinates {
 	return gardaLocations
 }
@@ -117,7 +82,8 @@ type CrimeType string
 
 var (
 	// MurderAndAssaultCrime 2004 - 2016
-	MurderAndAssaultCrime CrimeType = "Attempts or threats to murder, assaults, harassments and related offences"
+	MurderAndAssaultCrime CrimeType = "Attempts or threats to murder, assaults, " +
+		"harassments and related offences"
 	// DangerousActsCrime 2003 - 2016
 	DangerousActsCrime CrimeType = "Dangerous or negligent acts"
 	// KidnappingCrime 2003-2016
@@ -139,12 +105,16 @@ var (
 	// PublicOrderCrime 2003 - 2016
 	PublicOrderCrime CrimeType = "Public order and other social code offences"
 	// OrganisedCrime 2003 - 2016
-	OrganisedCrime CrimeType = "Offences against government, justice procedures and organisation of crime 2003"
+	OrganisedCrime CrimeType = "Offences against government, justice procedures " +
+		"and organisation of crime 2003"
 )
 
+// CrimesPerType maps the crime type and the number of crimes commited in the
+// given year.
 type CrimesPerType map[CrimeType]CrimesInYear
 
-// CrimesInYear contains a mapping from a year to the list of crimes
+// CrimesInYear contains a mapping from a year to the number of crimes committed
+// in that year.
 type CrimesInYear map[int]int
 
 func parseGardaCrimes() error {
@@ -182,6 +152,8 @@ func parseGardaCrimes() error {
 	return nil
 }
 
+// CrimesPerStation defines the number of crimes that were reported by the
+// given station.
 func CrimesPerStation() map[string]CrimesPerType {
 	return gardaCrimes
 }

@@ -15,6 +15,7 @@ env:
   TF_VAR_region:          ${{ secrets.NOMAD_REGION }}
   TF_VAR_datacenters:     ${{ secrets.NOMAD_DATACENTERS }}
   TF_VAR_docker_password: ${{ secrets.DOCKER_READ_TOKEN }}
+  TF_VAR_eircode_token:   ${{ secrets.EIRCODE_TOKEN }}
   TF_VAR_namespace:       saferplace
   TF_VAR_image:           ghcr.io/saferplace/saferplace:${{ github.sha }} # TODO: deduct from docker steps
 

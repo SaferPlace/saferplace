@@ -5,17 +5,20 @@ package eircodesaferplace
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"safer.place/internal/address"
 )
 
+// Resolver resolves the address to the coordinates and the name of the place.
 type Resolver struct {
 	c     *http.Client
 	addr  string
 	token string
 }
 
+// New creates a new resolver.
 func New(addr, token string) *Resolver {
 	return &Resolver{
 		addr:  addr,
@@ -24,6 +27,7 @@ func New(addr, token string) *Resolver {
 	}
 }
 
+// Resolve the address to the name, lat and lon.
 func (r *Resolver) Resolve(addr string) (string, float64, float64, error) {
 	req, err := http.NewRequest(http.MethodGet, r.addr+"/"+addr, nil)
 	if err != nil {
@@ -38,6 +42,7 @@ func (r *Resolver) Resolve(addr string) (string, float64, float64, error) {
 	if resp.StatusCode == http.StatusNotFound {
 		return "", 0, 0, address.ErrUnresolved
 	}
+	log.Println(resp)
 	if resp.StatusCode != http.StatusOK {
 		return "", 0, 0, fmt.Errorf("unexpected error: %w", err)
 	}
@@ -52,6 +57,7 @@ func (r *Resolver) Resolve(addr string) (string, float64, float64, error) {
 	return data.Address, data.Lattitude, data.Longitude, nil
 }
 
+// Data returned by the API.
 type Data struct {
 	Eircode   string  `json:"eircode"`
 	Address   string  `json:"address"`

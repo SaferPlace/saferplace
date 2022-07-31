@@ -23,3 +23,9 @@ variable "docker_password" {
   type        = string
   sensitive   = true
 }
+
+variable "eircode_token" {
+  description = "Token used to authenticate to the eircode service"
+  type        = string
+  sensitive   = true
+}

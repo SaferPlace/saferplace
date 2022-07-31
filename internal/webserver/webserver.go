@@ -13,8 +13,8 @@ import (
 type WebServer struct {
 	router *gin.Engine
 
-	addressResolvers []address.Resolver
-	scorer           score.Scorer
+	addressResolver address.Resolver
+	scorer          score.Scorer
 
 	// prepared language information
 	languages       map[string]language.Language
@@ -24,6 +24,7 @@ type WebServer struct {
 	NormalFont, FancyFont string
 }
 
+// New webserver from the list of options.
 func New(opts ...Option) *WebServer {
 	s := &WebServer{
 		router:    gin.Default(),
@@ -41,6 +42,7 @@ func New(opts ...Option) *WebServer {
 	return s
 }
 
+// Run the webserver on the port provided.
 func (s *WebServer) Run(port int) error {
 	return s.router.Run(fmt.Sprintf(":%d", port))
 }

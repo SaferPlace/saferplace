@@ -21,6 +21,9 @@ module "saferplace" {
   }
   docker_username = "Voytechnology"
   docker_password = var.docker_password
+  env = {
+    "SAFERPLACE_ADDRESS_RESOLVERS_EIRCODE_TOKEN" = var.eircode_token
+  }
 
   service_port = "http"
   service_tags = [

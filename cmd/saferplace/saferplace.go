@@ -8,9 +8,7 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 
-	"safer.place/internal/address"
 	"safer.place/internal/address/eircodesaferplace"
-	"safer.place/internal/address/roughprefix"
 	"safer.place/internal/language"
 	"safer.place/internal/score"
 	scorerv1 "safer.place/internal/score/v1"
@@ -54,21 +52,12 @@ func run() error {
 	}
 	opts = append(opts, webserver.Languages(langs))
 
-	// For now we just want something, we don't care what
-	var addrResolvers []address.Resolver
-	for _, r := range cfg.AddressResolvers.Order {
-		switch r {
-		case "roughprefix":
-			addrResolvers = append(addrResolvers, roughprefix.New())
-		case "eircode":
-			addrResolvers = append(addrResolvers, eircodesaferplace.New(
-				cfg.AddressResolvers.EircodeAddr,
-				cfg.AddressResolvers.EircodeToken,
-			))
-		}
-	}
+	addrResolver := eircodesaferplace.New(
+		cfg.AddressResolvers.EircodeAddr,
+		cfg.AddressResolvers.EircodeToken,
+	)
 
-	opts = append(opts, webserver.AddressResolvers(addrResolvers...))
+	opts = append(opts, webserver.AddressResolver(addrResolver))
 
 	// Parse the templates
 	tmpl := template.Must(template.New("").
@@ -102,7 +91,6 @@ type Config struct {
 }
 
 type AddressResolvers struct {
-	EircodeAddr  string   `split_words:"true" default:"https://eircode.safer.place"`
-	EircodeToken string   `split_words:"true"`
-	Order        []string `default:"roughprefix"`
+	EircodeAddr  string `split_words:"true" default:"https://eircode.safer.place"`
+	EircodeToken string `split_words:"true"`
 }

@@ -29,9 +29,9 @@ func Templates(tmpl *template.Template) Option {
 }
 
 // AddressResolver allows the webserver to resolve the address.
-func AddressResolvers(addrResolvers ...address.Resolver) Option {
+func AddressResolver(addrResolver address.Resolver) Option {
 	return func(s *WebServer) {
-		s.addressResolvers = addrResolvers
+		s.addressResolver = addrResolver
 	}
 }
 
