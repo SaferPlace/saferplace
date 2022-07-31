@@ -6,6 +6,8 @@ ENV CGO_ENABLED=0
 
 COPY . .
 
+RUN apk --update add ca-certificates
+
 RUN go mod download
 
 ARG TARGETOS
@@ -22,5 +24,6 @@ ENV GIN_MODE=release
 EXPOSE ${PORT}
 
 COPY --from=builder /bin/saferplace /bin/saferplace
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 ENTRYPOINT [ "/bin/saferplace" ]
