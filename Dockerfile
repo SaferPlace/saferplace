@@ -1,8 +1,10 @@
 #syntax
-FROM golang:1.18-alpine AS builder
+FROM golang:alpine AS builder
 
 WORKDIR /src
 ENV CGO_ENABLED=0
+
+RUN apk add -U --no-cache ca-certificates
 
 COPY . .
 
@@ -21,6 +23,7 @@ ENV GIN_MODE=release
 
 EXPOSE ${PORT}
 
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /bin/saferplace /bin/saferplace
 
 ENTRYPOINT [ "/bin/saferplace" ]
