@@ -8,6 +8,8 @@ RUN apk add -U --no-cache ca-certificates
 
 COPY . .
 
+RUN apk --update add ca-certificates
+
 RUN go mod download
 
 ARG TARGETOS
@@ -25,5 +27,6 @@ EXPOSE ${PORT}
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /bin/saferplace /bin/saferplace
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 ENTRYPOINT [ "/bin/saferplace" ]
