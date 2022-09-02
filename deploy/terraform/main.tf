@@ -5,7 +5,7 @@ resource "nomad_namespace" "saferplace" {
 
 module "saferplace" {
   source  = "Voytechnology/generic/nomad"
-  version = "0.0.3"
+  version = "0.0.4"
 
   job_name    = "saferplace"
   namespace   = var.namespace
