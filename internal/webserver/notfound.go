@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// NotFoundResponse is returned for all 404 pages.
 type NotFoundResponse struct {
 	Response
 
