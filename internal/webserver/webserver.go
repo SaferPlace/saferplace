@@ -41,6 +41,7 @@ func New(opts ...Option) *WebServer {
 	s.router.GET("/search", s.search)
 	s.router.GET("/about", s.about)
 	s.router.GET("/", s.index)
+	s.router.NoRoute(s.notfound)
 
 	return s
 }
