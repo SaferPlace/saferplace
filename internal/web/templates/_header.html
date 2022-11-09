@@ -8,8 +8,8 @@
   <link href="https://fonts.googleapis.com/css?family={{ .NormalFont }}|{{ .FancyFont }}" rel="stylesheet">
 
   <!-- Go Vanity URLs -->
-  {{ range from, to := .VanityImports }}
-  <meta name="go-import" content="{{ from }} git https://github.com/SaferPlace/{{ to }}">
+  {{ range $from, $to := .VanityImports }}
+  <meta name="go-import" content="{{ $from }} git https://github.com/SaferPlace/{{ $to }}">
   {{ end}}
   <!-- Tracking script removed for now -->
 </head>
