@@ -6,6 +6,11 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/tachyons@4.5.3/css/tachyons.min.css"/>
   <link href="https://fonts.googleapis.com/css?family={{ .NormalFont }}|{{ .FancyFont }}" rel="stylesheet">
+
+  <!-- Go Vanity URLs -->
+  {{ range from, to := .VanityImports }}
+  <meta name="go-import" content="{{ from }} git https://github.com/SaferPlace/{{ to }}">
+  {{ end}}
   <!-- Tracking script removed for now -->
 </head>
 <body class="flex flex-column pa0 ma0" style="height: 100%; margin: 0;">

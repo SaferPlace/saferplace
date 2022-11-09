@@ -22,13 +22,16 @@ type WebServer struct {
 
 	// Fonts
 	NormalFont, FancyFont string
+
+	vanityImports map[string]string
 }
 
 // New webserver from the list of options.
 func New(opts ...Option) *WebServer {
 	s := &WebServer{
-		router:    gin.Default(),
-		languages: make(map[string]language.Language),
+		router:        gin.Default(),
+		languages:     make(map[string]language.Language),
+		vanityImports: vanityImports,
 	}
 
 	for _, opt := range opts {
@@ -73,6 +76,8 @@ type Response struct {
 
 	NormalFont string
 	FancyFont  string
+
+	VanityImports map[string]string
 }
 
 // reques parses the standard request from the context.
@@ -101,7 +106,8 @@ func (s *WebServer) response(req Request) Response {
 		AvailableLanguages: s.languageOptions,
 		// This places trust that the language in the request is valid.
 		// Do we want this?
-		Lang:     req.Language,
-		Language: s.languages[req.Language],
+		Lang:          req.Language,
+		Language:      s.languages[req.Language],
+		VanityImports: s.vanityImports,
 	}
 }
