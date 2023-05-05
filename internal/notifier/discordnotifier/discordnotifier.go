@@ -36,7 +36,8 @@ func New(c *http.Client) (*Notifier, error) {
 
 // Notify sends the discord webhook notification
 func (n *Notifier) Notify(ctx context.Context, i *incident.Incident) error {
-	msg := fmt.Sprintf(messageFmt, i.Id, i.Lat, i.Lon, i.Description, i.Id)
+	msg := fmt.Sprintf(messageFmt,
+		i.Id, i.Coordinates.Lat, i.Coordinates.Lon, i.Description, i.Id)
 
 	data := discordgo.WebhookParams{
 		Content:    msg,

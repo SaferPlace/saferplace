@@ -3,8 +3,10 @@ Content-Type: application/json
 
 {
     "incident": {
-        "lat": 53.347843137955785,
-        "lon": -6.251658198166605,
+        "coordinates": {
+            "lat": 53.347843137955785,
+            "lon": -6.251658198166605
+        },
         "description": "Parking on a footpath"
     }
 }

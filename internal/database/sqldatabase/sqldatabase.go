@@ -10,6 +10,7 @@ import (
 	"api.safer.place/incident/v1"
 	"github.com/google/uuid"
 	"github.com/kelseyhightower/envconfig"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"safer.place/realtime/internal/database"
 )
 
@@ -99,10 +100,10 @@ func (db *Database) SaveIncident(ctx context.Context, inc *incident.Incident) er
 
 	if _, err := tx.Stmt(db.saveIncidentStmt).ExecContext(ctx,
 		inc.Id,
-		inc.Timestamp,
+		inc.Timestamp.Seconds,
 		inc.Description,
-		inc.Lat,
-		inc.Lon,
+		inc.Coordinates.Lat,
+		inc.Coordinates.Lon,
 		inc.Resolution.String(),
 	); err != nil {
 		return fmt.Errorf("unable to save incident: %w", err)
@@ -168,14 +169,15 @@ func (db *Database) ViewIncident(ctx context.Context, id string) (*incident.Inci
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	inc := new(incident.Incident)
-	resStr := ""
+	inc := &incident.Incident{Coordinates: &incident.Coordinates{}}
+	var resStr string
+	var ts int64
 	if err := tx.Stmt(db.viewIncidentStmt).QueryRow(id).Scan(
 		&inc.Id,
-		&inc.Timestamp,
+		&ts,
 		&inc.Description,
-		&inc.Lat,
-		&inc.Lon,
+		&inc.Coordinates.Lat,
+		&inc.Coordinates.Lon,
 		&resStr,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -184,6 +186,7 @@ func (db *Database) ViewIncident(ctx context.Context, id string) (*incident.Inci
 		return nil, fmt.Errorf("unable to get incident info: %w", err)
 	}
 	inc.Resolution = incident.Resolution(incident.Resolution_value[resStr])
+	inc.Timestamp = &timestamppb.Timestamp{Seconds: ts}
 
 	// TODO: Get comments
 	rows, err := tx.Stmt(db.viewCommentsStmt).QueryContext(ctx, id)
@@ -231,14 +234,15 @@ func (db *Database) IncidentsWithoutReview(ctx context.Context) ([]*incident.Inc
 
 	incidents := make([]*incident.Incident, 0)
 	for rows.Next() {
-		inc := new(incident.Incident)
-		resStr := ""
+		inc := &incident.Incident{Coordinates: &incident.Coordinates{}}
+		var resStr string
+		var ts int64
 		if err := rows.Scan(
 			&inc.Id,
-			&inc.Timestamp,
+			&ts,
 			&inc.Description,
-			&inc.Lat,
-			&inc.Lon,
+			&inc.Coordinates.Lat,
+			&inc.Coordinates.Lon,
 			&resStr,
 		); err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
@@ -247,6 +251,7 @@ func (db *Database) IncidentsWithoutReview(ctx context.Context) ([]*incident.Inc
 			return nil, fmt.Errorf("unable to get incident info: %w", err)
 		}
 		inc.Resolution = incident.Resolution(incident.Resolution_value[resStr])
+		inc.Timestamp = &timestamppb.Timestamp{Seconds: ts}
 		incidents = append(incidents, inc)
 	}
 

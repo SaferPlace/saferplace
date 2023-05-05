@@ -9,6 +9,7 @@ import Root from './routes/root'
 import { ReviewService } from '@saferplace/api/review/v1/review_connectweb'
 import { BasicIncidentDetails, ReviewIncidentRequest } from '@saferplace/api/review/v1/review_pb'
 import { AuthProvider } from 'oidc-react'
+import ErrorPage from './routes/error'
 
 const client = createPromiseClient(
   ReviewService,
@@ -44,7 +45,8 @@ const router = createBrowserRouter([
         element: <Incident />,
         loader: incidentLoader,
       }
-    ]
+    ],
+    errorElement: <ErrorPage />,
   },
 ])
 

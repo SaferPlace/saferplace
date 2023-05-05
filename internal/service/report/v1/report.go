@@ -7,11 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/bufbuild/connect-go"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"safer.place/realtime/internal/queue"
 
@@ -24,6 +24,8 @@ import (
 type Service struct {
 	queue queue.Producer[*ipb.Incident]
 	log   *zap.Logger
+
+	validator Validator
 }
 
 // Register creates a new service and and returns the
@@ -32,6 +34,10 @@ func Register(q queue.Producer[*ipb.Incident], log *zap.Logger) func() (string, 
 		return connectpb.NewReportServiceHandler(&Service{
 			queue: q,
 			log:   log,
+			validator: NewMultiValidator(
+				validateDescription,
+				validateCoordinates,
+			),
 		})
 	}
 }
@@ -47,9 +53,9 @@ func (s *Service) SendReport(
 	incident := req.Msg.Incident
 	// Override the ID no matter what its set to.
 	incident.Id = uuid.New().String()
-	incident.Timestamp = time.Now().Unix()
+	incident.Timestamp = timestamppb.Now()
 
-	if err := validateIncident(incident); err != nil {
+	if err := s.validator.Validate(incident); err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
@@ -79,19 +85,3 @@ func (e CoordinateError) Error() string {
 var (
 	errMissingDescription = errors.New("missing description")
 )
-
-func validateIncident(i *ipb.Incident) error {
-	// Do not accept incidents in the pass, but still allow for slow network
-	// connections and times being set incorrectly
-	if i.Description == "" {
-		return errMissingDescription
-	}
-	// TODO: Only accept incidents in Ireland
-	if !(-90 <= i.Lat && i.Lat <= 90) {
-		return fmt.Errorf("lattitude %w", CoordinateError{-90, 90})
-	}
-	if !(-180 <= i.Lon && i.Lon <= 180) {
-		return fmt.Errorf("longitude %w", CoordinateError{-180, 180})
-	}
-	return nil
-}

@@ -109,7 +109,7 @@ func (s *Service) IncidentsWithoutReview(
 		basicIncidents = append(basicIncidents, &pb.BasicIncidentDetails{
 			Id:          inc.Id,
 			Description: inc.Description,
-			Timestamp:   inc.Timestamp,
+			Timestamp:   inc.Timestamp.Seconds,
 		})
 	}
 	return connect.NewResponse(&pb.IncidentsWithoutReviewResponse{

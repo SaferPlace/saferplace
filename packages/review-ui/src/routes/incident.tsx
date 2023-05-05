@@ -48,12 +48,12 @@ function Review({incident, onSubmit}: Props) {
             height: '50vh',
           },
         }}>
-          <MapContainer center={[incident.lat, incident.lon]} zoom={14}>
+          <MapContainer center={latlon(incident.coordinates)} zoom={14}>
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <Marker position={[incident.lat, incident.lon]} />
+            <Marker position={latlon(incident.coordinates)} />
           </MapContainer>
         </Box>
       </CardMedia>
@@ -160,4 +160,8 @@ export default function Incident() {
   const {incident, onSubmit} = useLoaderData() as Props
  
   return <Review incident={incident} onSubmit={onSubmit} />
+}
+
+function latlon(coords: ipb.Coordinates | undefined): [number, number] {
+  return [coords?.lat || 0, coords?.lon || 0]
 }
