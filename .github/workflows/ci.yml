@@ -9,6 +9,9 @@ on:
   # Build all pull requests
   pull_request:
 
+env:
+  GOPRIVATE: github.com/saferplace
+
 jobs:
   lint:
     name: Lint
