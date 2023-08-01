@@ -3,11 +3,8 @@
 package main
 
 import (
-	"fmt"
-
-	"github.com/kelseyhightower/envconfig"
-
 	cmd "safer.place/realtime/internal/cmd/realtime"
+	"safer.place/realtime/internal/config"
 )
 
 func main() {
@@ -18,9 +15,9 @@ func main() {
 }
 
 func run() error {
-	var cfg cmd.Config
-	if err := envconfig.Process("saferplace", &cfg); err != nil {
-		return fmt.Errorf("unable to parse config: %w", err)
+	cfg, err := config.Parse("saferplace")
+	if err != nil {
+		return err
 	}
 	return cmd.Run(cfg)
 }

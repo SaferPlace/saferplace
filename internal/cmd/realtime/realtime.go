@@ -8,6 +8,7 @@ import (
 
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
+	"safer.place/realtime/internal/config"
 	"safer.place/realtime/internal/database"
 	"safer.place/realtime/internal/database/sqldatabase"
 	"safer.place/realtime/internal/notifier"
@@ -30,24 +31,7 @@ import (
 	"safer.place/realtime/internal/service/static"
 )
 
-// Config containing all configuration for the ingest engine
-type Config struct {
-	Port  int  `envconfig:"PORT" default:"8001"`
-	Debug bool `envconfig:"DEBUG"`
-
-	Cert CertConfig
-
-	Queue    string `default:"memory"`
-	Database string `default:"sql"`
-	Notifier string `default:"log"`
-}
-
-type CertConfig struct {
-	Domains  []string `default:"localhost"`
-	Provider string   `default:"insecure"`
-}
-
-func Run(cfg Config) (err error) {
+func Run(cfg *config.Config) (err error) {
 	var logger *zap.Logger
 	if cfg.Debug {
 		logger, _ = zap.NewDevelopment()
