@@ -29,6 +29,7 @@ import (
 	reportv1 "safer.place/realtime/internal/service/report/v1"
 	reviewv1 "safer.place/realtime/internal/service/review/v1"
 	"safer.place/realtime/internal/service/static"
+	viewerv1 "safer.place/realtime/internal/service/viewer/v1"
 )
 
 func Run(cfg *config.Config) (err error) {
@@ -79,6 +80,7 @@ func Run(cfg *config.Config) (err error) {
 	services := []webserver.Service{
 		reportv1.Register(q, logger.With(zap.String("service", "reportv1"))),
 		reviewv1.Register(db, logger.With(zap.String("service", "reviewv1"))),
+		viewerv1.Register(db, logger.With(zap.String("service", "viewerv1"))),
 		// TODO: Once we add more frontends maybe it would be better to move
 		// somewhere better.
 		static.Register("/", reviewui.StaticFiles), // review UI

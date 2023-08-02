@@ -26,4 +26,5 @@ type Database interface {
 	SaveReview(context.Context, string, incident.Resolution, *incident.Comment) error
 	ViewIncident(context.Context, string) (*incident.Incident, error)
 	IncidentsWithoutReview(context.Context) ([]*incident.Incident, error)
+	IncidentsInRadius(context.Context, *incident.Coordinates, float64) ([]*incident.Incident, error)
 }

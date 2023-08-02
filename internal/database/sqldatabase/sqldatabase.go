@@ -10,6 +10,7 @@ import (
 	"api.safer.place/incident/v1"
 	"github.com/google/uuid"
 	"github.com/kelseyhightower/envconfig"
+	"golang.org/x/exp/slices"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"safer.place/realtime/internal/database"
 )
@@ -25,6 +26,7 @@ type Database struct {
 	viewIncidentStmt           *sql.Stmt
 	viewCommentsStmt           *sql.Stmt
 	incidentsWithoutReviewStmt *sql.Stmt
+	incidentsInRadiusStmt      *sql.Stmt
 }
 
 // New creates a new SQL database
@@ -71,6 +73,10 @@ func New() (*Database, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to prepare incidentsWithoutReview query: %w", err)
 	}
+	incidentsInRadiusStmt, err := db.Prepare(incidentsInRadiusQuery)
+	if err != nil {
+		return nil, fmt.Errorf("unable to prepare incidentsInRadius query: %w", err)
+	}
 
 	return &Database{
 		db:                         db,
@@ -81,6 +87,7 @@ func New() (*Database, error) {
 		viewIncidentStmt:           viewIncidentStmt,
 		viewCommentsStmt:           viewCommentsStmt,
 		incidentsWithoutReviewStmt: incidentsWithoutReviewStmt,
+		incidentsInRadiusStmt:      incidentsInRadiusStmt,
 	}, nil
 }
 
@@ -258,6 +265,50 @@ func (db *Database) IncidentsWithoutReview(ctx context.Context) ([]*incident.Inc
 	return incidents, nil
 }
 
+// IncidentsInRadius gets all incidents and then does some maths to filter it to only include
+// incidents in the provided radius
+func (db *Database) IncidentsInRadius(
+	ctx context.Context, center *incident.Coordinates, radius float64,
+) ([]*incident.Incident, error) {
+	rows, err := db.incidentsInRadiusStmt.QueryContext(ctx)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return []*incident.Incident{}, nil
+		}
+		return nil, fmt.Errorf("unable list incidents: %w", err)
+	}
+
+	incidents := make([]*incident.Incident, 0)
+	for rows.Next() {
+		inc := &incident.Incident{Coordinates: &incident.Coordinates{}}
+		var resStr string
+		var ts int64
+		if err := rows.Scan(
+			&inc.Id,
+			&ts,
+			&inc.Description,
+			&inc.Coordinates.Lat,
+			&inc.Coordinates.Lon,
+			&resStr,
+		); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, database.ErrDoesNotExist
+			}
+			return nil, fmt.Errorf("unable to get incident info: %w", err)
+		}
+		inc.Resolution = incident.Resolution(incident.Resolution_value[resStr])
+		inc.Timestamp = &timestamppb.Timestamp{Seconds: ts}
+		incidents = append(incidents, inc)
+	}
+
+	// Delete all incidents which are outside of the given radius
+	incidents = slices.DeleteFunc(incidents, func(i *incident.Incident) bool {
+		return distance(center.Lat, center.Lon, i.Coordinates.Lat, i.Coordinates.Lon) > radius
+	})
+
+	return incidents, nil
+}
+
 func (db *Database) hasIncident(ctx context.Context, tx *sql.Tx, id string) (bool, error) {
 	// First check do we already have an entry, so we can return already exists
 	row := tx.Stmt(db.hasIncidentStmt).QueryRowContext(ctx, id)
@@ -339,4 +390,10 @@ SELECT * FROM comments WHERE incident_id=?;
 
 var incidentsWithoutReviewQuery = `
 SELECT * FROM incidents WHERE resolution=?;
+`
+
+// incidentsInRadiusQuery gets all incidents as some SQL databases might not contain geospatial functions
+// We might have to look into altenative databases for more efficient querying.
+var incidentsInRadiusQuery = `
+SELECT * FROM incidents;
 `
