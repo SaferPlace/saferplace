@@ -12,6 +12,7 @@ type Config struct {
 	Debug bool `envconfig:"DEBUG"`
 
 	Cert CertConfig
+	Auth AuthConfig
 
 	Queue    string `default:"memory"`
 	Database string `default:"sql"`
@@ -22,6 +23,13 @@ type Config struct {
 type CertConfig struct {
 	Domains  []string `default:"localhost"`
 	Provider string   `default:"insecure"`
+}
+
+// AuthConfig is used to configure OAuth
+type AuthConfig struct {
+	ClientID     string `split_words:"true"`
+	ClientSecret string `split_words:"true"`
+	Domain       string `default:"http://localhost:8001"`
 }
 
 // Parse the configuration

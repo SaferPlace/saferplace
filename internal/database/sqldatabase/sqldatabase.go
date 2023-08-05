@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"time"
 
 	"api.safer.place/incident/v1"
 	"github.com/google/uuid"
@@ -27,6 +28,8 @@ type Database struct {
 	viewCommentsStmt           *sql.Stmt
 	incidentsWithoutReviewStmt *sql.Stmt
 	incidentsInRadiusStmt      *sql.Stmt
+	saveSessionStmt            *sql.Stmt
+	isValidSessionStmt         *sql.Stmt
 }
 
 // New creates a new SQL database
@@ -77,6 +80,14 @@ func New() (*Database, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to prepare incidentsInRadius query: %w", err)
 	}
+	saveSessionStmt, err := db.Prepare(saveSessionQuery)
+	if err != nil {
+		return nil, fmt.Errorf("unable to prepare saveComment query: %w", err)
+	}
+	isValidSessionStmt, err := db.Prepare(isValidSessionQuery)
+	if err != nil {
+		return nil, fmt.Errorf("unable to prepare isValidSession query: %w", err)
+	}
 
 	return &Database{
 		db:                         db,
@@ -88,6 +99,8 @@ func New() (*Database, error) {
 		viewCommentsStmt:           viewCommentsStmt,
 		incidentsWithoutReviewStmt: incidentsWithoutReviewStmt,
 		incidentsInRadiusStmt:      incidentsInRadiusStmt,
+		saveSessionStmt:            saveSessionStmt,
+		isValidSessionStmt:         isValidSessionStmt,
 	}, nil
 }
 
@@ -309,6 +322,40 @@ func (db *Database) IncidentsInRadius(
 	return incidents, nil
 }
 
+// SaveSession in the database
+// TODO: Decide should the database layer decide on the session expiry or should it be
+// determined somewhere else.
+func (db *Database) SaveSession(ctx context.Context, session string) error {
+	// TODO: At least make the expiry configurable.
+	expiry := time.Now().Add(1 * time.Hour)
+	if _, err := db.saveSessionStmt.ExecContext(ctx, session, expiry.Unix()); err != nil {
+		return fmt.Errorf("unable to save session: %w", err)
+	}
+
+	return nil
+}
+
+// IsValidSession determines if the session is still active and within date.
+// It returns nil if the session is valid, otherwise some error.
+// TODO: If the session is expired, delete it
+func (db *Database) IsValidSession(ctx context.Context, session string) error {
+	row := db.isValidSessionStmt.QueryRowContext(ctx, session)
+	if err := row.Err(); err != nil {
+		return fmt.Errorf("unable to check if the session is valid: %w", err)
+	}
+	var expiryUnix int64
+	if err := row.Scan(&expiryUnix); err != nil {
+		return fmt.Errorf("unable to scan row: %w", err)
+	}
+
+	expiry := time.Unix(expiryUnix, 0)
+	if time.Since(expiry) > 0 {
+		return errors.New("session expired")
+	}
+
+	return nil
+}
+
 func (db *Database) hasIncident(ctx context.Context, tx *sql.Tx, id string) (bool, error) {
 	// First check do we already have an entry, so we can return already exists
 	row := tx.Stmt(db.hasIncidentStmt).QueryRowContext(ctx, id)
@@ -356,6 +403,11 @@ CREATE TABLE IF NOT EXISTS comments (
 	resolution TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS incident_ids ON comments (incident_id);
+
+CREATE TABLE IF NOT EXISTS sessions (
+	id     TEXT PRIMARY KEY,
+	expiry INTEGER NOT NULL
+);
 `
 
 var saveIncidentQuery = `
@@ -396,4 +448,15 @@ SELECT * FROM incidents WHERE resolution=?;
 // We might have to look into altenative databases for more efficient querying.
 var incidentsInRadiusQuery = `
 SELECT * FROM incidents;
+`
+
+var saveSessionQuery = `
+INSERT INTO sessions
+	(id, expiry)
+VALUES
+	(?, ?);
+`
+
+var isValidSessionQuery = `
+SELECT expiry FROM sessions WHERE id=?;
 `
