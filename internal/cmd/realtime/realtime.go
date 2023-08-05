@@ -8,6 +8,7 @@ import (
 
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
+	"safer.place/realtime/internal/auth"
 	"safer.place/realtime/internal/config"
 	"safer.place/realtime/internal/database"
 	"safer.place/realtime/internal/database/sqldatabase"
@@ -22,13 +23,13 @@ import (
 	"safer.place/webserver/certificate"
 	"safer.place/webserver/certificate/insecure"
 	"safer.place/webserver/certificate/temporary"
+	"safer.place/webserver/middleware"
 
 	"api.safer.place/incident/v1"
 
 	// Registered services
 	reportv1 "safer.place/realtime/internal/service/report/v1"
 	reviewv1 "safer.place/realtime/internal/service/review/v1"
-	"safer.place/realtime/internal/service/static"
 	viewerv1 "safer.place/realtime/internal/service/viewer/v1"
 )
 
@@ -41,6 +42,10 @@ func Run(cfg *config.Config) (err error) {
 		logger, _ = zap.NewProduction()
 	}
 	defer func() { _ = logger.Sync() }()
+
+	logger.Debug("using configuration",
+		zap.Any("config", cfg),
+	)
 
 	var q queue.Queue[*incident.Incident]
 	switch cfg.Queue {
@@ -83,7 +88,25 @@ func Run(cfg *config.Config) (err error) {
 		viewerv1.Register(db, logger.With(zap.String("service", "viewerv1"))),
 		// TODO: Once we add more frontends maybe it would be better to move
 		// somewhere better.
-		static.Register("/", reviewui.StaticFiles), // review UI
+		auth.Register("/review/", &auth.Config{
+			Handler:      http.FileServer(http.FS(reviewui.StaticFiles)),
+			Log:          logger.With(zap.String("service", "reviewauth")),
+			Domain:       cfg.Auth.Domain,
+			ClientID:     cfg.Auth.ClientID,
+			ClientSecret: cfg.Auth.ClientSecret,
+			DB:           db,
+		}),
+	}
+
+	middlewares := []middleware.Middleware{
+		middleware.Cors(nil),
+	}
+	// Only enable request logging when debug mode is active to prevent unnecessary collection.
+	// This will be normally done using metrics.
+	if cfg.Debug {
+		middlewares = append(middlewares,
+			loggingMiddleware(logger.With(zap.String("component", "requestlog"))),
+		)
 	}
 
 	var certProvider certificate.Provider
@@ -105,6 +128,7 @@ func Run(cfg *config.Config) (err error) {
 		webserver.Logger(logger.With(zap.String("component", "server"))),
 		webserver.Services(services...),
 		webserver.TLSConfig(tlsConfig),
+		webserver.Middlewares(middlewares...),
 	)
 	if err != nil {
 		return fmt.Errorf("unable to create the server: %w", err)
@@ -119,4 +143,16 @@ func Run(cfg *config.Config) (err error) {
 	})
 
 	return eg.Wait()
+}
+
+// TODO: Move this somewhere else
+func loggingMiddleware(log *zap.Logger) middleware.Middleware {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			log.Info("request",
+				zap.String("path", r.URL.Path),
+			)
+			h.ServeHTTP(w, r)
+		})
+	}
 }
