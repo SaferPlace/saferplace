@@ -84,7 +84,11 @@ func Run(cfg *config.Config) (err error) {
 
 	services := []webserver.Service{
 		reportv1.Register(q, logger.With(zap.String("service", "reportv1"))),
-		reviewv1.Register(db, logger.With(zap.String("service", "reviewv1"))),
+		reviewv1.Register(
+			db,
+			logger.With(zap.String("service", "reviewv1")),
+			auth.NewAuthInterceptor(db),
+		),
 		viewerv1.Register(db, logger.With(zap.String("service", "viewerv1"))),
 		// TODO: Once we add more frontends maybe it would be better to move
 		// somewhere better.

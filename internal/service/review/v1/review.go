@@ -27,12 +27,13 @@ type Service struct {
 func Register(
 	db database.Database,
 	log *zap.Logger,
+	interceptors ...connect.Interceptor,
 ) func() (string, http.Handler) {
 	return func() (string, http.Handler) {
 		return connectpb.NewReviewServiceHandler(&Service{
 			db:  db,
 			log: log,
-		})
+		}, connect.WithInterceptors(interceptors...))
 	}
 }
 
