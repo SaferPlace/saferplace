@@ -3,7 +3,7 @@ import React from 'react'
 import 'leaflet/dist/leaflet.css'
 import { MapContainer, Marker, TileLayer } from 'react-leaflet'
 import { PartialMessage, ServiceType } from '@bufbuild/protobuf'
-import { ReviewService } from '@saferplace/api/review/v1/review_connectweb'
+import { ReviewService } from '@saferplace/api/review/v1/review_connect'
 
 import { ReviewIncidentRequest } from '@saferplace/api/review/v1/review_pb'
 import * as ipb from '@saferplace/api/incident/v1/incident_pb'

@@ -1,4 +1,3 @@
-import { createConnectTransport, createPromiseClient } from '@bufbuild/connect-web'
 import { CssBaseline } from '@mui/material'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
@@ -6,10 +5,14 @@ import { createBrowserRouter, LoaderFunctionArgs, RouterProvider } from 'react-r
 import Incident, { Props } from './routes/incident'
 import Pending from './routes/pending'
 import Root from './routes/root'
-import { ReviewService } from '@saferplace/api/review/v1/review_connectweb'
+import { ReviewService } from '@saferplace/api/review/v1/review_connect'
 import { BasicIncidentDetails, ReviewIncidentRequest } from '@saferplace/api/review/v1/review_pb'
 import { AuthProvider } from 'oidc-react'
 import ErrorPage from './routes/error'
+
+import { createPromiseClient } from '@bufbuild/connect'
+import { createConnectTransport } from '@bufbuild/connect-web'
+import { basename } from 'path'
 
 const client = createPromiseClient(
   ReviewService,
@@ -48,21 +51,27 @@ const router = createBrowserRouter([
     ],
     errorElement: <ErrorPage />,
   },
-])
+], {
+  basename: import.meta.env.BASE_URL,
+})
 
 
 function App() {
   return (
-    <AuthProvider
-      authority={import.meta.env.VITE_OIDC_AUTHORITY}
-      clientId={import.meta.env.VITE_OIDC_CLIENT_ID}
-      redirectUri={import.meta.env.VITE_OIDC_REDIRECT_URL}
-      scope='user:email'
-      clientSecret={import.meta.env.VITE_OIDC_CLIENT_SECRET}
-    >
+    // <AuthProvider
+    //   authority={import.meta.env.VITE_OIDC_AUTHORITY}
+    //   clientId={import.meta.env.VITE_OIDC_CLIENT_ID}
+    //   redirectUri={import.meta.env.VITE_OIDC_REDIRECT_URL}
+    //   scope='user:email'
+    //   clientSecret={import.meta.env.VITE_OIDC_CLIENT_SECRET}
+    // >
+    //   <RouterProvider router={router} />
+    //   <CssBaseline />
+    // </AuthProvider>
+    <>
       <RouterProvider router={router} />
       <CssBaseline />
-    </AuthProvider>
+    </>
   )
 }
 

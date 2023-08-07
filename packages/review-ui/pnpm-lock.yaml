@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@babel/core':
     specifier: ^7.20.5
@@ -7,12 +11,15 @@ dependencies:
   '@babel/plugin-syntax-jsx':
     specifier: ^7.18.6
     version: 7.18.6(@babel/core@7.20.5)
+  '@bufbuild/connect':
+    specifier: ^0.12.0
+    version: 0.12.0(@bufbuild/protobuf@1.2.1)
   '@bufbuild/connect-web':
-    specifier: ^0.8.6
-    version: 0.8.6(@bufbuild/protobuf@1.2.0)
+    specifier: ^0.12.0
+    version: 0.12.0(@bufbuild/protobuf@1.2.1)
   '@bufbuild/protobuf':
-    specifier: ^1.2.0
-    version: 1.2.0
+    specifier: ^1.2.1
+    version: 1.2.1
   '@emotion/react':
     specifier: ^11.10.5
     version: 11.10.5(@babel/core@7.20.5)(@types/react@18.0.26)(react@18.2.0)
@@ -26,8 +33,8 @@ dependencies:
     specifier: ^5.10.16
     version: 5.10.16(@emotion/react@11.10.5)(@emotion/styled@11.10.5)(@types/react@18.0.26)(react-dom@18.2.0)(react@18.2.0)
   '@saferplace/api':
-    specifier: 0.0.12
-    version: 0.0.12
+    specifier: 0.0.14
+    version: 0.0.14
   '@typescript-eslint/parser':
     specifier: ^5.45.0
     version: 5.45.0(eslint@8.29.0)(typescript@4.9.3)
@@ -57,6 +64,9 @@ devDependencies:
   '@types/leaflet':
     specifier: ^1.9.0
     version: 1.9.0
+  '@types/node':
+    specifier: ^20.4.6
+    version: 20.4.6
   '@types/react':
     specifier: ^18.0.26
     version: 18.0.26
@@ -92,7 +102,7 @@ devDependencies:
     version: 4.9.3
   vite:
     specifier: ^3.2.4
-    version: 3.2.4
+    version: 3.2.4(@types/node@20.4.6)
 
 packages:
 
@@ -346,25 +356,25 @@ packages:
       '@babel/helper-validator-identifier': 7.19.1
       to-fast-properties: 2.0.0
 
-  /@bufbuild/connect-web@0.8.6(@bufbuild/protobuf@1.2.0):
-    resolution: {integrity: sha512-+ZI7Ercc0X1vlQr1iHa35EymtFjq1x4rByE+ToNyw05mwB7yxk4nw4iUa/Z7PfHYba1dAcgnnrvRDI2K7TBPBQ==}
+  /@bufbuild/connect-web@0.12.0(@bufbuild/protobuf@1.2.1):
+    resolution: {integrity: sha512-bw5E6aIs0q3ab5oyIB263ShRg8DhUMsewMHsl/9lUxJFkmzxvHoPIlNFrSWOUUcyudJrahfhDveXF94bi9C5cA==}
     peerDependencies:
-      '@bufbuild/protobuf': ^1.2.0
+      '@bufbuild/protobuf': ^1.2.1
     dependencies:
-      '@bufbuild/connect': 0.8.6(@bufbuild/protobuf@1.2.0)
-      '@bufbuild/protobuf': 1.2.0
+      '@bufbuild/connect': 0.12.0(@bufbuild/protobuf@1.2.1)
+      '@bufbuild/protobuf': 1.2.1
     dev: false
 
-  /@bufbuild/connect@0.8.6(@bufbuild/protobuf@1.2.0):
-    resolution: {integrity: sha512-z9gW4hcQxCz7w0kjt1JyMp7VEQQdm7CYiZHvNq4vZtMbKOje2DC8kSb62XStHHd3AdoDZq1cb1s11F5TMSwZYw==}
+  /@bufbuild/connect@0.12.0(@bufbuild/protobuf@1.2.1):
+    resolution: {integrity: sha512-rYn3Akp7teOkvqxguLbf6QKizH37Yeo33lseV+JHDZC19CsAV9wrrZM17Sa+LNEBj/hrYtQF7EIcllgGxhv9aw==}
     peerDependencies:
-      '@bufbuild/protobuf': ^1.2.0
+      '@bufbuild/protobuf': ^1.2.1
     dependencies:
-      '@bufbuild/protobuf': 1.2.0
+      '@bufbuild/protobuf': 1.2.1
     dev: false
 
-  /@bufbuild/protobuf@1.2.0:
-    resolution: {integrity: sha512-MBVuQMOBHxgGnZ9XCUIi8WOy5O/T4ma3TduCRhRvndv3UDbG9cHgd8h6nOYSGyBYPEvXf1z9nTwhp8mVIDbq2g==}
+  /@bufbuild/protobuf@1.2.1:
+    resolution: {integrity: sha512-cwwGvLGqvoaOZmoP5+i4v/rbW+rHkguvTehuZyM2p/xpmaNSdT2h3B7kHw33aiffv35t1XrYHIkdJSEkSEMJuA==}
     dev: false
 
   /@emotion/babel-plugin@11.10.5(@babel/core@7.20.5):
@@ -792,10 +802,10 @@ packages:
     engines: {node: '>=14'}
     dev: false
 
-  /@saferplace/api@0.0.12:
-    resolution: {integrity: sha512-eITRAm+YL7KgzIS1PDeXYNIFiTUys+7YoK/wL8T3dFejz9pkL3Tpo/Q0lq+5Q3sVtGmM7YELzAlKNlpdtFsYBQ==, tarball: https://npm.pkg.github.com/download/@saferplace/api/0.0.12/55d29e6cfd8673aaf2cec58c514d9da8ae400ec4}
+  /@saferplace/api@0.0.14:
+    resolution: {integrity: sha512-DE+25eb4lnFSIAVbD+0AVa3rNZeBemVGlzpP49Wcu9CMnwH++DrEKYo4+Zky71+J3QSo8TA3TboV/jRhu7k/5w==, tarball: https://npm.pkg.github.com/download/@saferplace/api/0.0.14/366f9511a882989d160fd30129a1d7d5ef206a6e}
     dependencies:
-      '@bufbuild/protobuf': 1.2.0
+      '@bufbuild/protobuf': 1.2.1
     dev: false
 
   /@types/geojson@7946.0.10:
@@ -814,6 +824,10 @@ packages:
     resolution: {integrity: sha512-7LeOSj7EloC5UcyOMo+1kc3S1UT3MjJxwqsMT1d2PTyvQz53w0Y0oSSk9nwZnOZubCmBvpSNGceucxiq+ZPEUw==}
     dependencies:
       '@types/geojson': 7946.0.10
+    dev: true
+
+  /@types/node@20.4.6:
+    resolution: {integrity: sha512-q0RkvNgMweWWIvSMDiXhflGUKMdIxBo2M2tYM/0kEGDueQByFzK4KZAgu5YHGFNxziTlppNpTIBcqHQAxlfHdA==}
     dev: true
 
   /@types/parse-json@4.0.0:
@@ -992,7 +1006,7 @@ packages:
       '@babel/plugin-transform-react-jsx-source': 7.19.6(@babel/core@7.20.5)
       magic-string: 0.26.7
       react-refresh: 0.14.0
-      vite: 3.2.4
+      vite: 3.2.4(@types/node@20.4.6)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -2820,7 +2834,7 @@ packages:
     dependencies:
       punycode: 2.1.1
 
-  /vite@3.2.4:
+  /vite@3.2.4(@types/node@20.4.6):
     resolution: {integrity: sha512-Z2X6SRAffOUYTa+sLy3NQ7nlHFU100xwanq1WDwqaiFiCe+25zdxP1TfCS5ojPV2oDDcXudHIoPnI1Z/66B7Yw==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
@@ -2845,6 +2859,7 @@ packages:
       terser:
         optional: true
     dependencies:
+      '@types/node': 20.4.6
       esbuild: 0.15.16
       postcss: 8.4.19
       resolve: 1.22.1
