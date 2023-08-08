@@ -446,9 +446,17 @@ SELECT * FROM incidents WHERE resolution=?;
 
 // incidentsInRadiusQuery gets all incidents as some SQL databases might not contain geospatial functions
 // We might have to look into altenative databases for more efficient querying.
-var incidentsInRadiusQuery = `
-SELECT * FROM incidents;
-`
+var incidentsInRadiusQuery = fmt.Sprintf(`
+SELECT *
+FROM incidents
+WHERE
+	resolution=%q
+	OR
+	resolution=%q;
+`,
+	incident.Resolution_RESOLUTION_ACCEPTED,
+	incident.Resolution_RESOLUTION_ALERTED,
+)
 
 var saveSessionQuery = `
 INSERT INTO sessions
