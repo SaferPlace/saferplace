@@ -1,0 +1,8 @@
+{
+    "name": "SaferPlace",
+    "dockerComposeFile": "./docker-compose.yml",
+    "service": "saferplace",
+    "shutdownAction": "stopCompose",
+    "postCreateCommand": "GOPRIVATE=github.com/saferplace,safer.place go get ./..",
+    "workspaceFolder": "/saferplace"
+}
