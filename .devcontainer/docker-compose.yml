@@ -16,6 +16,7 @@ services:
       - ~/.gitconfig:/root/.gitconfig
     environment:
       - TZ=
+      - DEBUG=true
     cap_add:
       # For debugging with dlv
       - SYS_PTRACE
@@ -25,5 +26,17 @@ services:
     entrypoint: [ "zsh", "-c", "while sleep 1000; do :; done" ]
     ports:
       - "8001:8001"
-    env:
-      - DEBUG=true
+    depends_on:
+      - minio
+  minio:
+    image: minio/minio
+    entrypoint: [""]
+    command:
+      - "sh"
+      - "-c"
+      - "mkdir -p /data/saferplace && minio server --quiet /saferplace --console-address :9001"
+    ports:
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=saferplace
+      - MINIO_ROOT_PASSWORD=supersecret
