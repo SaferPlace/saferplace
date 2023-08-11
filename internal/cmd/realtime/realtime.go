@@ -18,6 +18,8 @@ import (
 	"safer.place/realtime/internal/queue"
 	"safer.place/realtime/internal/queue/memory"
 	"safer.place/realtime/internal/review"
+	"safer.place/realtime/internal/storage"
+	"safer.place/realtime/internal/storage/minio"
 	reviewui "safer.place/realtime/packages/review-ui"
 	"safer.place/webserver"
 	"safer.place/webserver/certificate"
@@ -28,6 +30,7 @@ import (
 	"api.safer.place/incident/v1"
 
 	// Registered services
+	"safer.place/realtime/internal/service/imageupload"
 	reportv1 "safer.place/realtime/internal/service/report/v1"
 	reviewv1 "safer.place/realtime/internal/service/review/v1"
 	viewerv1 "safer.place/realtime/internal/service/viewer/v1"
@@ -59,6 +62,15 @@ func Run(cfg *config.Config) (err error) {
 		db, err = sqldatabase.New()
 		if err != nil {
 			return fmt.Errorf("unable to open SQL database: %w", err)
+		}
+	}
+
+	var store storage.Storage
+	switch cfg.Storage {
+	case "minio":
+		store, err = minio.New()
+		if err != nil {
+			return fmt.Errorf("unable to open minio storage: %w", err)
 		}
 	}
 
@@ -100,6 +112,8 @@ func Run(cfg *config.Config) (err error) {
 			ClientSecret: cfg.Auth.ClientSecret,
 			DB:           db,
 		}),
+		// TODO: Add authentication
+		imageupload.Register(logger.With(zap.String("service", "imageupload")), store),
 	}
 
 	middlewares := []middleware.Middleware{

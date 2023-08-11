@@ -16,6 +16,7 @@ type Config struct {
 
 	Queue    string `default:"memory"`
 	Database string `default:"sql"`
+	Storage  string `default:"minio"`
 	Notifier string `default:"log"`
 }
 
