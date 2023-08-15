@@ -6,13 +6,11 @@ import Incident, { Props } from './routes/incident'
 import Pending from './routes/pending'
 import Root from './routes/root'
 import { ReviewService } from '@saferplace/api/review/v1/review_connect'
-import { BasicIncidentDetails, ReviewIncidentRequest } from '@saferplace/api/review/v1/review_pb'
-import { AuthProvider } from 'oidc-react'
+import { BasicIncidentDetails } from '@saferplace/api/review/v1/review_pb'
 import ErrorPage from './routes/error'
 
 import { createPromiseClient } from '@bufbuild/connect'
 import { createConnectTransport } from '@bufbuild/connect-web'
-import { basename } from 'path'
 
 const client = createPromiseClient(
   ReviewService,
@@ -56,28 +54,9 @@ const router = createBrowserRouter([
 })
 
 
-function App() {
-  return (
-    // <AuthProvider
-    //   authority={import.meta.env.VITE_OIDC_AUTHORITY}
-    //   clientId={import.meta.env.VITE_OIDC_CLIENT_ID}
-    //   redirectUri={import.meta.env.VITE_OIDC_REDIRECT_URL}
-    //   scope='user:email'
-    //   clientSecret={import.meta.env.VITE_OIDC_CLIENT_SECRET}
-    // >
-    //   <RouterProvider router={router} />
-    //   <CssBaseline />
-    // </AuthProvider>
-    <>
-      <RouterProvider router={router} />
-      <CssBaseline />
-    </>
-  )
-}
-
-
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <App />
+    <RouterProvider router={router} />
+    <CssBaseline />
   </React.StrictMode>
 )

@@ -2,13 +2,12 @@ import { Box, Button, Card, CardContent, CardHeader, CardMedia, Stack, TextField
 import React from 'react'
 import 'leaflet/dist/leaflet.css'
 import { MapContainer, Marker, TileLayer } from 'react-leaflet'
-import { PartialMessage, ServiceType } from '@bufbuild/protobuf'
-import { ReviewService } from '@saferplace/api/review/v1/review_connect'
+import { PartialMessage } from '@bufbuild/protobuf'
 
 import { ReviewIncidentRequest } from '@saferplace/api/review/v1/review_pb'
 import * as ipb from '@saferplace/api/incident/v1/incident_pb'
 import { Close, Done, Notifications } from '@mui/icons-material'
-import { redirect, useLoaderData, useNavigate, useRevalidator } from 'react-router-dom'
+import { useLoaderData, useNavigate, useRevalidator } from 'react-router-dom'
 
 
 export type Props = {
