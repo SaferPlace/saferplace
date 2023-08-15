@@ -1,14 +1,23 @@
 # Workflow used as Continous Integration every time we have a PR.
-name: CI
+name: Go
 
 on:
   # Only build when pushed to main
   push:
     branches:
-    - main
+      - main
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
   # Build all pull requests
   pull_request:
-
+    branches:
+      - main
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
 jobs:
   lint:
     name: Lint
