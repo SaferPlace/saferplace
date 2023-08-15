@@ -1,2 +1,5 @@
 # Ignore temporary databases created for testing.
 *.db
+
+eslint_report.json
+node_modules/
