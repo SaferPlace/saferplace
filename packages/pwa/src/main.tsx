@@ -8,11 +8,22 @@ import Root from './routes/root'
 import { CssBaseline } from '@mui/material'
 import Login from './routes/login'
 import './i18n'
+import Home from './routes/home'
+import Incidents from './routes/incidents'
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Root />,
+    children: [
+      {
+        path: '/',
+        element: <Home />,
+      }, {
+        path: 'incidents',
+        element: <Incidents />
+      },
+    ]
   }, {
     path: '/login',
     element: <Login />,

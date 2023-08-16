@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 export default function Login() {
     const [email, setEmail] =  React.useState<string>(localStorage.getItem('email') ?? '')
+    const [backend, setBackend] = React.useState<string>(localStorage.getItem('backend') ?? import.meta.env.VITE_BACKEND)
     const navigate = useNavigate()
     const { t } = useTranslation()
 
@@ -21,9 +22,13 @@ export default function Login() {
         }
     }, [])
 
-    const useEmail = () => {
+    const saveEmail = () => {
         localStorage.setItem('email', email)
         navigate('/')
+    }
+
+    const saveBackend = () => {
+        localStorage.setItem('backend', backend)
     }
 
     return (
@@ -37,7 +42,8 @@ export default function Login() {
                             <TextField
                                 label={t('common:email')}
                                 variant='outlined'
-                                fullWidth type='email'
+                                fullWidth
+                                type='email'
                                 value={email}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                     setEmail(e.target.value)
@@ -46,13 +52,32 @@ export default function Login() {
                             <Button
                                 variant='contained'
                                 fullWidth
-                                onClick={useEmail}
+                                onClick={saveEmail}
                             >
                                 {t('action:useEmail')}
                             </Button>
                             <Typography>{t('phrases:addToHomeScreen')}</Typography>
                         </Stack>
                     </Paper>
+                    <Stack direction={{ xs: 'column', sm: 'row' }}>
+                        <TextField
+                            label={t('common:backend')}
+                            variant='outlined'
+                            fullWidth
+                            type='url'
+                            value={backend}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                setBackend(e.target.value)
+                            }}
+                        />
+                        <Button
+                            variant='contained'
+                            fullWidth
+                            onClick={saveBackend}
+                        >
+                            {t('action:useBackend')}
+                        </Button>
+                        </Stack>
                 </Stack>
             </Container>
         </Box>
