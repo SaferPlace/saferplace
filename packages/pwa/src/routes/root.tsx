@@ -1,6 +1,7 @@
-import { useNavigate } from "react-router-dom"
+import { Outlet, useNavigate } from "react-router-dom"
 import {useUser} from "../hooks/user"
 import React from "react"
+
 
 export default function Root() {
     const [user] = useUser()
@@ -15,6 +16,6 @@ export default function Root() {
    
 
     return (
-        <div>SaferPlace</div>
+        <Outlet />
     )
 }

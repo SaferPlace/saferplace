@@ -35,6 +35,9 @@ importers:
       '@bufbuild/connect-web':
         specifier: ^0.12.0
         version: 0.12.0(@bufbuild/protobuf@1.3.0)
+      '@bufbuild/protobuf':
+        specifier: ^1.2.1
+        version: 1.3.0
       '@emotion/react':
         specifier: ^11.10.5
         version: 11.10.5(@babel/core@7.22.10)(@types/react@18.2.15)(react@18.2.0)
@@ -47,6 +50,9 @@ importers:
       '@mui/material':
         specifier: ^5.10.16
         version: 5.10.16(@emotion/react@11.10.5)(@emotion/styled@11.10.5)(@types/react@18.2.15)(react-dom@18.2.0)(react@18.2.0)
+      '@saferplace/api':
+        specifier: 0.0.14
+        version: 0.0.14
       i18next:
         specifier: ^23.4.4
         version: 23.4.4
@@ -2232,7 +2238,7 @@ packages:
   /@saferplace/api@0.0.14:
     resolution: {integrity: sha512-DE+25eb4lnFSIAVbD+0AVa3rNZeBemVGlzpP49Wcu9CMnwH++DrEKYo4+Zky71+J3QSo8TA3TboV/jRhu7k/5w==, tarball: https://npm.pkg.github.com/download/@saferplace/api/0.0.14/366f9511a882989d160fd30129a1d7d5ef206a6e}
     dependencies:
-      '@bufbuild/protobuf': 1.2.1
+      '@bufbuild/protobuf': 1.3.0
     dev: false
 
   /@surma/rollup-plugin-off-main-thread@2.2.3:
