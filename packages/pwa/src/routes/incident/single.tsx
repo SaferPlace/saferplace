@@ -8,6 +8,7 @@ export default function IncidentDetails() {
     return (
         <Card>
             {incident.description}
+            {incident.timestamp?.toDate.toString()}
         </Card>
     )
 }
