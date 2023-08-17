@@ -4,6 +4,7 @@ package viewer
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"api.safer.place/viewer/v1"
@@ -52,5 +53,29 @@ func (s *Service) ViewInRadius(
 
 	return connect.NewResponse(&viewer.ViewInRadiusResponse{
 		Incidents: incidents,
+	}), nil
+}
+
+// ViewIncident shows the incident information
+func (s *Service) ViewIncident(
+	ctx context.Context,
+	req *connect.Request[viewer.ViewIncidentRequest],
+) (
+	*connect.Response[viewer.ViewIncidentResponse],
+	error,
+) {
+	s.log.Info("view incident",
+		zap.String("id", req.Msg.Id),
+	)
+
+	inc, err := s.db.ViewIncident(ctx, req.Msg.Id)
+	if err != nil {
+		if errors.Is(err, database.ErrDoesNotExist) {
+			return nil, connect.NewError(connect.CodeNotFound, err)
+		}
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+	return connect.NewResponse(&viewer.ViewIncidentResponse{
+		Incident: inc,
 	}), nil
 }

@@ -9,7 +9,9 @@ import { CssBaseline } from '@mui/material'
 import Login from './routes/login'
 import './i18n'
 import Home from './routes/home'
-import Incidents from './routes/incidents'
+import IncidentList from './routes/incident/list'
+import Incident from './routes/incident/single'
+import { incidentLoader, incidentsInRadiusLoader } from './routes/incident/loaders'
 
 const router = createBrowserRouter([
   {
@@ -21,8 +23,13 @@ const router = createBrowserRouter([
         element: <Home />,
       }, {
         path: 'incidents',
-        element: <Incidents />
-      },
+        loader: incidentsInRadiusLoader,
+        Component: IncidentList,
+      }, {
+        path: 'incident/:id',
+        loader: incidentLoader,
+        Component: Incident,
+      }
     ]
   }, {
     path: '/login',
