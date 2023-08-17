@@ -62,6 +62,11 @@ jobs:
         workspace:
           - pwa
           - review-ui
+        include:
+          - workspace: pwa
+            deploy: true
+            cloudflareProjectName: saferplace-app
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -104,3 +109,14 @@ jobs:
         if: steps.changes.outputs.affected == 'true'
         working-directory: packages/${{ matrix.workspace }}
         run: pnpm run build
+
+      - name: Deploy
+        if: matrix.deploy
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          projectName: ${{ matrix.cloudflareProjectName }}
+          accountId: 77fe99c5bfc86a6c12a8092954daec44
+          directory: packages/${{ matrix.workspace }}/dist
+          gitHubToken: ${{ github.token }}
+
