@@ -17,15 +17,8 @@ on:
     - 'packages/**'
     - 'package.json'
 
-permissions:
-  actions: write
-  checks: write
-  contents: write
-  deployments: write
-  issues: write
-  packages: read
-  pull-requests: read
-  statuses: write
+# TODO: Determine is this the safe permission. We probably don't want to allow all.
+permissions: write-all
 
 jobs:
   lint:
