@@ -16,6 +16,12 @@ on:
     paths:
     - 'packages/**'
     - 'package.json'
+
+permissions:
+  actions: write
+  checks: write
+  deployments: write
+
 jobs:
   lint:
     name: Lint
