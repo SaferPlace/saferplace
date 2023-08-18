@@ -20,9 +20,9 @@
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@mui/icons-material": "^5.10.16",
-    "@mui/material": "^5.10.16",
+    "@mui/material": "^5.14.5",
     "@saferplace/api": "0.0.14",
-    "leaflet": "^1.9.3",
+    "leaflet": "^1.9.4",
     "oidc-react": "^3.0.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -37,6 +37,6 @@
     "@types/react-dom": "^18.0.9",
     "@vitejs/plugin-react": "^2.2.0",
     "typescript": "*",
-    "vite": "^3.2.4"
+    "vite": "^4.4.9"
   }
 }

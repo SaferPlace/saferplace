@@ -16,6 +16,10 @@ on:
     paths:
     - 'packages/**'
     - 'package.json'
+
+# TODO: Determine is this the safe permission. We probably don't want to allow all.
+permissions: write-all
+
 jobs:
   lint:
     name: Lint
@@ -111,7 +115,7 @@ jobs:
         run: pnpm run build
 
       - name: Deploy
-        if: matrix.deploy
+        if: matrix.deploy && steps.changes.outputs.affected == 'true'
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
