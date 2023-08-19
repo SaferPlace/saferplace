@@ -47,6 +47,11 @@ func TestValidators(t *testing.T) {
 			fn:  validateCoordinates,
 			err: nil,
 		},
+		"empty coordinates not on transportation": {
+			inc: &incident.Incident{},
+			fn:  validateCoordinates,
+			err: errMissingCoordinates,
+		},
 		"coordinates on transportation invalid longitude": {
 			inc: &incident.Incident{
 				Location: incident.Location_LOCATION_TRANSPORTATION,
