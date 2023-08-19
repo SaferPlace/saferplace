@@ -1,4 +1,4 @@
-import { Link } from "@mui/material"
+import { Link, Stack } from "@mui/material"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink } from 'react-router-dom'
 
@@ -6,6 +6,9 @@ export default function Home() {
     const { t } = useTranslation()
 
     return (
-        <Link component={RouterLink} to='/incidents'>{t('action:viewIncidents')}</Link>
+        <Stack>
+            <Link component={RouterLink} to='/incidents'>{t('action:viewIncidents')}</Link>
+            <Link component={RouterLink} to='/report'>{t('action:report')}</Link>
+        </Stack>
     )
 }

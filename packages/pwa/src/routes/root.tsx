@@ -1,7 +1,7 @@
 import { Outlet, useNavigate } from "react-router-dom"
 import {useUser} from "../hooks/user"
 import React from "react"
-
+import { Container } from "@mui/material"
 
 export default function Root() {
     const [user] = useUser()
@@ -14,8 +14,9 @@ export default function Root() {
         }
     }, [user, navigate])
    
-
     return (
-        <Outlet />
+        <Container sx={{marginBlock: 2}}>
+            <Outlet />
+        </Container>
     )
 }
