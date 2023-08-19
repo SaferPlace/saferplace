@@ -7,7 +7,11 @@ import (
 	"fmt"
 
 	"api.safer.place/incident/v1"
-	ipb "api.safer.place/incident/v1"
+)
+
+var (
+	errMissingDescription = errors.New("missing description")
+	errMissingCoordinates = errors.New("missing coordinates")
 )
 
 type ValidatorFunc func(i *incident.Incident) error
@@ -44,11 +48,15 @@ func validateDescription(i *incident.Incident) error {
 }
 
 // validateCoordinates checks are the coordinates valid, but it
-func validateCoordinates(i *ipb.Incident) error {
+func validateCoordinates(i *incident.Incident) error {
 	// If the incident happened on a mode of transportation, we can ignore empty
 	// coordinates, otherwise still ensure they are valid
-	if i.Location == ipb.Location_LOCATION_TRANSPORTATION && i.Coordinates == nil {
+	if i.Location == incident.Location_LOCATION_TRANSPORTATION && i.Coordinates == nil {
 		return nil
+	}
+
+	if i.Coordinates == nil {
+		return errMissingCoordinates
 	}
 
 	// TODO: Only accept incidents in Ireland

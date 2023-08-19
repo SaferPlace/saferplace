@@ -4,7 +4,6 @@ package report
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -81,7 +80,3 @@ type CoordinateError struct {
 func (e CoordinateError) Error() string {
 	return fmt.Sprintf("coordinate must be between %.4f and %.4f", e.min, e.max)
 }
-
-var (
-	errMissingDescription = errors.New("missing description")
-)
