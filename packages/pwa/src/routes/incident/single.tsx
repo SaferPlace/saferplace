@@ -67,15 +67,15 @@ export default function IncidentDetails() {
             <Card>
                 <CardContent>
                     <Stack spacing={2}>
-                        <Typography variant='h4'>{t('phrases:description')}</Typography>
+                        <Typography variant='h4'>{t('common:description')}</Typography>
                         <Box padding={2}>
                             <TextField value={incident.description} disabled={true} fullWidth />
                         </Box>
-                        <Typography variant='h4'>{t('phrases:submitted')}</Typography>
+                        <Typography variant='h4'>{t('common:submittedAtTime')}</Typography>
                         <Box padding={2}>
                             {created?.toLocaleTimeString()} {created?.toDateString()}
                         </Box>
-                        <Typography variant='h4'>{t('phases:reportStatus')}</Typography>
+                        <Typography variant='h4'>{t('common:reportStatus')}</Typography>
                         <Box padding={2}>
                             <Alert icon={status.icon} severity={status.severity}>{status.description}</Alert>
                         </Box>

@@ -8,7 +8,7 @@ export default function Home() {
     return (
         <Stack>
             <Link component={RouterLink} to='/incidents'>{t('action:viewIncidents')}</Link>
-            <Link component={RouterLink} to='/report'>{t('action:report')}</Link>
+            <Link component={RouterLink} to='/report'>{t('action:submitReport')}</Link>
         </Stack>
     )
 }

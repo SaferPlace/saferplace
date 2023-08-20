@@ -72,6 +72,7 @@ export default function Report() {
                 </Button>
                 { error && (
                     <Alert severity='error'>
+                        {/* TODO: Error i18n (#94) */}
                         {error?.message}
                     </Alert>
                 )}
