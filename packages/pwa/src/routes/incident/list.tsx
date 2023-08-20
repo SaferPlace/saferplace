@@ -24,7 +24,7 @@ export default function Incidents() {
                 ))}
             </Stack>
             <Typography>
-                {center.lat} { center.lon} { radius }m
+                {center.lat}, { center.lon } { radius }m
             </Typography>
         </Container>
     )

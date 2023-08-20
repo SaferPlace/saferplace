@@ -1,24 +1,13 @@
 import { LoaderFunctionArgs } from "react-router-dom"
 import { getClient } from "../../hooks/client"
 import { ViewerService } from "@saferplace/api/viewer/v1/viewer_connect"
-import { Incident } from "@saferplace/api/incident/v1/incident_pb"
 import { IncidentsProps } from "./list"
+import { Props as SingleProps } from './single'
+import { getPosition } from "../../hooks/position"
 
-async function getPosition(): Promise<{lat: number, lon: number}> {
-    return new Promise((resolve, reject) => {
-        if (!navigator.geolocation) {
-            return reject('No geolocation')
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            (position) => console.log(position.coords),
-            (error) => {
-                console.error(error)
-                // If we cannot get the location default to The Criminal Court of Justice
-                resolve({lat: 53.34868617902951, lon: -6.29567143778413})
-            },
-        )
-    })
+function getQuery(request: Request, query: string): string | null {
+    const url = new URL(request.url)
+    return url.searchParams.get(query)
 }
 
 /**
@@ -30,16 +19,15 @@ export async function incidentsInRadiusLoader({request}: LoaderFunctionArgs): Pr
 
     const user = await getPosition()
     console.debug('user position', user)
-    
-    const url = new URL(request.url)
-    const radius = Number.parseFloat(url.searchParams.get('radius') ?? '10000000')
+
+    const radius = Number.parseFloat(getQuery(request, 'radius') ?? '10000000')
     const lat = ((): number => {
-        const p = url.searchParams.get('lat')
-        return p ? Number.parseFloat(p) : user.lat
+        const p = getQuery(request, 'lan')
+        return p ? Number.parseFloat(p) : user.lat ?? 0
     })()
     const lon = ((): number => {
-        const p = url.searchParams.get('long')
-        return p ? Number.parseFloat(p) : user.lon
+        const p = getQuery(request, 'lon')
+        return p ? Number.parseFloat(p) : user.lon ?? 0
     })()
 
     return client.viewInRadius({
@@ -58,8 +46,13 @@ export async function incidentsInRadiusLoader({request}: LoaderFunctionArgs): Pr
  * @returns Incident
  * @throws Error if we could not get an incident
  */
-export async function incidentLoader({params}: LoaderFunctionArgs): Promise<Incident> {
+export async function incidentLoader({request, params}: LoaderFunctionArgs): Promise<SingleProps> {
+    const isNewReport = getQuery(request, 'isNewReport') === 'true'
     const client = getClient(ViewerService)
-    return client.viewIncident({id: params.id ?? ''})
-        .then(resp => resp.incident!)
+    // return client.viewIncident({id: params.id ?? ''})
+    //     .then(resp => ({resp.incident!} as SingleProps))
+    return client.viewIncident({
+        id: params.id ?? ''
+    })
+        .then(resp => ({incident: resp.incident, isNewReport} as SingleProps))
 }

@@ -12,6 +12,8 @@ import Home from './routes/home'
 import IncidentList from './routes/incident/list'
 import Incident from './routes/incident/single'
 import { incidentLoader, incidentsInRadiusLoader } from './routes/incident/loaders'
+import Report from './routes/report'
+import { reportLoader } from './routes/loaders'
 
 const router = createBrowserRouter([
   {
@@ -20,20 +22,24 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Home />,
+        Component: Home,
       }, {
-        path: 'incidents',
+        path: '/incidents',
         loader: incidentsInRadiusLoader,
         Component: IncidentList,
       }, {
         path: 'incident/:id',
         loader: incidentLoader,
         Component: Incident,
+      }, {
+        path: 'report',
+        loader: reportLoader,
+        Component: Report,
       }
     ]
   }, {
     path: '/login',
-    element: <Login />,
+    Component: Login,
   }
 ])
 
