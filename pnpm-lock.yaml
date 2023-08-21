@@ -130,8 +130,8 @@ importers:
         specifier: ^1.9.4
         version: 1.9.4
       oidc-react:
-        specifier: ^3.0.4
-        version: 3.0.4(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^3.2.2
+        version: 3.2.2(react-dom@18.2.0)(react@18.2.0)
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -3745,21 +3745,21 @@ packages:
       object-keys: 1.1.1
     dev: true
 
-  /oidc-client-ts@2.2.2:
-    resolution: {integrity: sha512-tEpnC1xQX6PMhnDMNEvDhpqnsu0buh29b/sA9a1I5tq6lD87wRAW1rTj49B2+5925I0sQlvU64DoK0Pxeiu7Dg==}
+  /oidc-client-ts@2.2.4:
+    resolution: {integrity: sha512-nOZwIomju+AmXObl5Oq5PjrES/qTt8bLsENJCIydVgi9TEWk7SCkOU6X3RNkY7yfySRM1OJJvDKdREZdmnDT2g==}
     engines: {node: '>=12.13.0'}
     dependencies:
       crypto-js: 4.1.1
       jwt-decode: 3.1.2
     dev: false
 
-  /oidc-react@3.0.4(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-of00vk+HsofkAQvBl9yxd7rqpDi650xJevcZX3HH3qapvwkTFpRpKJUALAQgItXvE9UFlbLMJKM17WQ2lfsKxw==}
+  /oidc-react@3.2.2(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-xt5DtgiI6yxS+7ff2nBUZR49YfovfAApgpYhmsMoAutlqb41uZUcmquiIWRtbEXLe7UF5Zs8i1eQ1jFpr/+4JQ==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || || ^17.0.0 ||  ^18.0.0
     dependencies:
-      oidc-client-ts: 2.2.2
+      oidc-client-ts: 2.2.4
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
