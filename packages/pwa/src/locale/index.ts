@@ -10,6 +10,7 @@ export type TranslationFile = {
         useEmail: string
         useBackend: string
         viewIncidents: string
+        viewIncident: string
         submitReport: string
     }>,
     phrases: Partial<{

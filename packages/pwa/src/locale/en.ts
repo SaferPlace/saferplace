@@ -12,6 +12,7 @@ export default {
         useEmail: "Use Email",
         useBackend: "Use Backend",
         viewIncidents: "View Incidents",
+        viewIncident: "View Incident",
         submitReport: "Submit Report",
     },
     phrases: {

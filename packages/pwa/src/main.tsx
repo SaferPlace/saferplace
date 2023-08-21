@@ -14,6 +14,7 @@ import Incident from './routes/incident/single'
 import { incidentLoader, incidentsInRadiusLoader } from './routes/incident/loaders'
 import Report from './routes/report'
 import { reportLoader } from './routes/loaders'
+import Map from './routes/incident/map'
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,9 @@ const router = createBrowserRouter([
   }, {
     path: '/login',
     Component: Login,
+  }, {
+    path: '/map',
+    Component: Map,
   }
 ])
 

@@ -12,6 +12,7 @@ export default {
     useEmail: "Użyj e-mail",
     useBackend: "Użyj Backendu",
     viewIncidents: "Zobacz Zdarzenia",
+    viewIncident: "Zobacz Zdarzenie",
     submitReport: "Zgłos Zdarzenie",
   },
   phrases: {
