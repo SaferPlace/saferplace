@@ -9,6 +9,7 @@ export default function Home() {
         <Stack>
             <Link component={RouterLink} to='/incidents'>{t('action:viewIncidents')}</Link>
             <Link component={RouterLink} to='/report'>{t('action:submitReport')}</Link>
+            <Link component={RouterLink} to='/map'>{t('action:viewMap')}</Link>
         </Stack>
     )
 }
