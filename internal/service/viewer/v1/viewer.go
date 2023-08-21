@@ -46,6 +46,12 @@ func (s *Service) ViewInRadius(
 		// PII (location data) in logs.
 	)
 
+	if req.Msg.Center == nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument,
+			errors.New("missing center"),
+		)
+	}
+
 	incidents, err := s.db.IncidentsInRadius(ctx, req.Msg.Center, req.Msg.Radius)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeUnavailable, err)
