@@ -16,7 +16,7 @@ export type Props = {
 }
 
 function Review({incident, onSubmit}: Props) {
-  console.debug('showing incident', incident.id)
+  console.debug('incident', incident)
   const navigate = useNavigate();
   const revalidator = useRevalidator();
 
@@ -55,6 +55,7 @@ function Review({incident, onSubmit}: Props) {
             <Marker position={latlon(incident.coordinates)} />
           </MapContainer>
         </Box>
+        <img src={`${import.meta.env.VITE_CDN}/images/${incident.imageId}`} width='100%' />
       </CardMedia>
       <CardHeader>
         <Typography variant='h4'>Review Incident {incident.id}</Typography>
