@@ -5,6 +5,8 @@ import { SendReportRequest, SendReportResponse } from '@saferplace/api/report/v1
 import { useLoaderData, useNavigate } from "react-router-dom"
 import React from "react"
 import { usePosition } from "../hooks/position"
+import { getEndpoint } from "../hooks/client";
+import PhotoCapture from "../components/photocapture";
 
 export type Props = {
     submit: (request: PartialMessage<SendReportRequest>) => Promise<SendReportResponse>
@@ -19,10 +21,35 @@ export default function Report() {
     const [ submitted, setSubmitted ] = React.useState<boolean>(false)
     const [ description, setDescription ] = React.useState<string>('')
     const [ error, setError ] = React.useState<Error | null>(null)
+    const [ image, setImage ] = React.useState<File|undefined>()
+
+    const uploadImage = async (): Promise<string> => {
+        if (!image) { return '' }
+        const data = new FormData()
+        data.append('image', image)
+        return fetch(`${getEndpoint()}/v1/upload`, {
+            method: 'POST',
+            body: data,
+        })
+            .then(resp => resp.text())
+    }
 
     const onSubmit = async() => {
         setSubmitted(true)
         setError(null)
+
+        let imageID = ''
+        if (image) {
+            imageID = await uploadImage()
+                .catch(err => setError(err))
+                ?? ''
+            if (imageID === '') return
+        }
+
+        // TODO: This is temporary only as the API doesn't yet support submitting
+        //       images.
+        console.info('uploaded image for incident', imageID)
+        
         props.submit({
             incident: {
                 description,
@@ -64,7 +91,10 @@ export default function Report() {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                 />
+                <PhotoCapture image={image} setImage={setImage} />
                 <Button
+                    variant='contained'
+                    color='success'
                     onClick={onSubmit}
                     disabled={submitted}
                 >

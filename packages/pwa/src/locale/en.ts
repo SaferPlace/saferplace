@@ -14,6 +14,8 @@ export default {
         viewIncidents: "View Incidents",
         viewIncident: "View Incident",
         submitReport: "Submit Report",
+        takePhoto: "Take Photo",
+        retakePhoto: "Retake Photo",
     },
     phrases: {
         addToHomeScreen: "Add SaferPlace to your homescreen for easier access!",

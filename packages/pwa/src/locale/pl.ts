@@ -14,6 +14,8 @@ export default {
     viewIncidents: "Zobacz Zdarzenia",
     viewIncident: "Zobacz Zdarzenie",
     submitReport: "Zgłos Zdarzenie",
+    takePhoto: "Zrób Zdjęcie",
+    retakePhoto: "Zrób Zdjęcie Ponownie",
   },
   phrases: {
     addToHomeScreen: "Dodaj SaferPlace do ekranu głównego, aby uzyskać łatwiejszy dostęp!",

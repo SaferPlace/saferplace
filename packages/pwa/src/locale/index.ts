@@ -12,6 +12,8 @@ export type TranslationFile = {
         viewIncidents: string
         viewIncident: string
         submitReport: string
+        retakePhoto: string
+        takePhoto: string
     }>,
     phrases: Partial<{
         addToHomeScreen: string
