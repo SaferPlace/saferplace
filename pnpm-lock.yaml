@@ -72,8 +72,8 @@ importers:
         specifier: ^13.1.2
         version: 13.1.2(i18next@23.4.4)(react-dom@18.2.0)(react@18.2.0)
       react-leaflet:
-        specifier: ^4.2.0
-        version: 4.2.0(leaflet@1.9.4)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^4.2.1
+        version: 4.2.1(leaflet@1.9.4)(react-dom@18.2.0)(react@18.2.0)
       react-router-dom:
         specifier: ^6.15.0
         version: 6.15.0(react-dom@18.2.0)(react@18.2.0)
@@ -148,8 +148,8 @@ importers:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
       react-leaflet:
-        specifier: ^4.2.0
-        version: 4.2.0(leaflet@1.9.4)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^4.2.1
+        version: 4.2.1(leaflet@1.9.4)(react-dom@18.2.0)(react@18.2.0)
       react-router-dom:
         specifier: ^6.4.4
         version: 6.15.0(react-dom@18.2.0)(react@18.2.0)
@@ -3978,8 +3978,8 @@ packages:
     resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
     dev: false
 
-  /react-leaflet@4.2.0(leaflet@1.9.4)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-9d8T7hzYrQA5GLe3vn0qtRLJzQKgjr080NKa45yArGwuSl1nH/6aK9gp7DeYdktpdO1vKGSUTGW5AsUS064X0A==}
+  /react-leaflet@4.2.1(leaflet@1.9.4)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-p9chkvhcKrWn/H/1FFeVSqLdReGwn2qmiobOQGO3BifX+/vV/39qhY8dGqbdcPh1e6jxh/QHriLXr7a4eLFK4Q==}
     peerDependencies:
       leaflet: ^1.9.0
       react: ^18.0.0
