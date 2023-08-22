@@ -15,35 +15,48 @@ import { incidentLoader, incidentsInRadiusLoader } from './routes/incident/loade
 import Report from './routes/report'
 import { reportLoader } from './routes/loaders'
 import Map from './routes/incident/map'
+import Page from './routes/page'
 
 const router = createBrowserRouter([
+  // Routes not requiring Authentication
   {
-    path: '/',
-    element: <Root />,
-    children: [
-      {
-        path: '/',
-        Component: Home,
-      }, {
-        path: '/incidents',
-        loader: incidentsInRadiusLoader,
-        Component: IncidentList,
-      }, {
-        path: 'incident/:id',
-        loader: incidentLoader,
-        Component: Incident,
-      }, {
-        path: 'report',
-        loader: reportLoader,
-        Component: Report,
-      }
-    ]
-  }, {
     path: '/login',
     Component: Login,
-  }, {
-    path: '/map',
-    Component: Map,
+  },
+  // Routes Requiring Authentication
+  {
+    path: '/',
+    Component: Root,
+    children: [
+      // Pages with nice borders etc
+      {
+        path: '/',
+        Component: Page,
+        children: [
+          {
+            path: '/',
+            Component: Home,
+          }, {
+            path: '/incidents',
+            loader: incidentsInRadiusLoader,
+            Component: IncidentList,
+          }, {
+            path: 'incident/:id',
+            loader: incidentLoader,
+            Component: Incident,
+          }, {
+            path: 'report',
+            loader: reportLoader,
+            Component: Report,
+          }
+        ]
+      },
+      // Fullpage applications
+      {
+        path: '/map',
+        Component: Map,
+      }
+    ]
   }
 ])
 

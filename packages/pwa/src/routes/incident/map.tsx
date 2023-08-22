@@ -1,14 +1,16 @@
 import { Coordinates, Incident } from "@saferplace/api/incident/v1/incident_pb"
 import { MapContainer, Marker, TileLayer, LayerGroup, Popup } from 'react-leaflet'
 import { useMapEvents } from 'react-leaflet/hooks'
-import { Box, Button, Skeleton } from "@mui/material"
+import { Box, Button, Fab, Skeleton, Stack } from "@mui/material"
 import React from 'react'
 import { usePosition } from "../../hooks/position"
 import useClient from "../../hooks/client"
 import { ViewerService } from "@saferplace/api/viewer/v1/viewer_connect"
 import 'leaflet/dist/leaflet.css'
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
+import { Add } from "@mui/icons-material"
+import { List } from "@mui/icons-material"
 
 export type Props = {
     center?: Coordinates
@@ -48,38 +50,74 @@ export default function Map() {
     
     return (
         <Box sx={{
-            '.leaflet-container': {
-                height: '100vh',
+            display: 'flex',
+            flexGrow: 1,
+            '.leaflet-container': (theme) => ({
+                display: 'flex',
                 width: '100vw',
-            },
+                minWidth: '100%',
+                maxWidht: '100%',
+                height: window.innerHeight - Number(theme.components?.MuiToolbar?.defaultProps?.style?.height || 54), // 
+                minHeight: '100%',
+                maxHeight: '100%',
+                flexGrow: 1,
+            }),
         }}>
+            <Stack
+                direction='row'
+                spacing={2}
+                sx={(theme) => ({
+                    zIndex: 10000,
+                    position: 'absolute',
+                    bottom: theme.spacing(2),
+                    right: theme.spacing(2),
+                })}
+            >
+                <Fab
+                    variant='extended'
+                    component={NavLink}
+                    to={`/incidents?radius=${zoomToRadius(center?.lat ?? 0, zoom)}&lat=${center?.lat ?? 0}&lon=${center?.lon ?? 0}`}
+                >
+                    <List sx={{ marginInlineEnd: 1 }} />
+                    {t('action:viewIncidents')}
+                </Fab>
+                <Fab
+                    component={NavLink}
+                    variant='extended'
+                    color='primary'
+                    to='/report'
+                >
+                    <Add sx={{ marginInlineEnd: 1 }} />
+                    {t('action:submitReport')}
+                </Fab>
+            </Stack>
             { center ? (
                 <MapContainer center={latlon(center)} zoom={zoom}>
-                <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <LayerGroup>
-                    { incidents.map(incident => (
-                        <Marker key={incident.id} position={latlon(incident.coordinates)}>
-                            <Popup>
-                                <Button
-                                    onClick={() => navigate(`/incident/${incident.id}`)}
-                                >
-                                    {t('action:viewIncident')}
-                                </Button>
-                            </Popup>
-                        </Marker>
-                    )) }
-                    {/* Enable for debugging */}
-                    {/* <Circle center={latlon(center)} radius={zoomToRadius(center?.lat ?? 0, zoom)} /> */}
-                </LayerGroup>
-                <MapDescendant
-                    center={new Coordinates(initialPosition)}
-                    setCenter={setCenter}
-                    setZoom={setZoom}
-                />
-            </MapContainer>
+                    <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <LayerGroup>
+                        { incidents.map(incident => (
+                            <Marker key={incident.id} position={latlon(incident.coordinates)}>
+                                <Popup>
+                                    <Button
+                                        onClick={() => navigate(`/incident/${incident.id}`)}
+                                    >
+                                        {t('action:viewIncident')}
+                                    </Button>
+                                </Popup>
+                            </Marker>
+                        )) }
+                        {/* Enable for debugging */}
+                        {/* <Circle center={latlon(center)} radius={zoomToRadius(center?.lat ?? 0, zoom)} /> */}
+                    </LayerGroup>
+                    <MapDescendant
+                        center={new Coordinates(initialPosition)}
+                        setCenter={setCenter}
+                        setZoom={setZoom}
+                    />
+                </MapContainer>
             ) : (
                 <Skeleton />
             )}

@@ -1,7 +1,8 @@
-import { Outlet, useNavigate } from "react-router-dom"
+import { NavLink, Outlet, useNavigate } from "react-router-dom"
 import {useUser} from "../hooks/user"
 import React from "react"
-import { Container } from "@mui/material"
+import { AppBar, Box, IconButton, Toolbar, Typography } from "@mui/material"
+import MapIcon from '@mui/icons-material/Map';
 
 export default function Root() {
     const [user] = useUser()
@@ -12,11 +13,34 @@ export default function Root() {
             console.info('user is not authenticated, redirecting to login')
             navigate('/login')
         }
-    }, [user, navigate])
+    }, [user])
    
     return (
-        <Container sx={{marginBlock: 2}}>
+        <Box>
+            <AppBar>
+                <Toolbar>
+                    <Typography
+                        variant='h4'
+                        flexGrow={1}
+                        component={NavLink}
+                        to='/'
+                        color='inherit'
+                        sx={{ textDecoration: 'none' }}
+                    >
+                        SaferPlace
+                        </Typography>
+                    <IconButton
+                        component={NavLink}
+                        to='/map'
+                        color='inherit'
+                    >
+                        <MapIcon />
+                    </IconButton>
+                </Toolbar>
+            </AppBar>
+            <Toolbar />
             <Outlet />
-        </Container>
+        </Box>
+        
     )
 }
