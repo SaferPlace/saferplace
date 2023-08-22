@@ -3,7 +3,7 @@ module safer.place/realtime
 go 1.20
 
 require (
-	api.safer.place v0.0.15
+	api.safer.place v0.0.16
 	connectrpc.com/connect v1.11.0
 	github.com/bwmarrin/discordgo v0.27.1
 	github.com/google/uuid v1.3.0
@@ -40,6 +40,6 @@ require (
 )
 
 replace (
-	api.safer.place v0.0.15 => github.com/saferplace/api v0.0.15
+	api.safer.place v0.0.16 => github.com/saferplace/api v0.0.16
 	safer.place/webserver v0.0.3 => github.com/saferplace/webserver-go v0.0.3
 )

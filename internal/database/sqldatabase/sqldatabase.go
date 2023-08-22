@@ -126,6 +126,7 @@ func (db *Database) SaveIncident(ctx context.Context, inc *incident.Incident) er
 		inc.Coordinates.Lat,
 		inc.Coordinates.Lon,
 		inc.Resolution.String(),
+		inc.ImageId,
 	); err != nil {
 		return fmt.Errorf("unable to save incident: %w", err)
 	}
@@ -200,6 +201,7 @@ func (db *Database) ViewIncident(ctx context.Context, id string) (*incident.Inci
 		&inc.Coordinates.Lat,
 		&inc.Coordinates.Lon,
 		&resStr,
+		&inc.ImageId,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, database.ErrDoesNotExist
@@ -265,6 +267,7 @@ func (db *Database) IncidentsWithoutReview(ctx context.Context) ([]*incident.Inc
 			&inc.Coordinates.Lat,
 			&inc.Coordinates.Lon,
 			&resStr,
+			&inc.ImageId,
 		); err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return nil, database.ErrDoesNotExist
@@ -304,6 +307,7 @@ func (db *Database) IncidentsInRadius(
 			&inc.Coordinates.Lat,
 			&inc.Coordinates.Lon,
 			&resStr,
+			&inc.ImageId,
 		); err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return nil, database.ErrDoesNotExist
@@ -394,7 +398,8 @@ CREATE TABLE IF NOT EXISTS incidents (
 	description TEXT,
 	lat REAL NOT NULL,
 	lon REAL NOT NULL,
-	resolution TEXT NOT NULL
+	resolution TEXT NOT NULL,
+	image TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS comments (
@@ -415,9 +420,9 @@ CREATE TABLE IF NOT EXISTS sessions (
 
 var saveIncidentQuery = `
 INSERT INTO incidents
-	(id, timestamp, description, lat, lon, resolution)
+	(id, timestamp, description, lat, lon, resolution, image)
 VALUES
-	(?, ?, ?, ?, ?, ?);
+	(?, ?, ?, ?, ?, ?, ?);
 `
 
 var updateResolutionQuery = `

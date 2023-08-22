@@ -99,7 +99,8 @@ func Run(cfg *config.Config) (err error) {
 		reviewv1.Register(
 			db,
 			logger.With(zap.String("service", "reviewv1")),
-			auth.NewAuthInterceptor(db),
+			// TODO: Re-enable once we know what we are doing.
+			// auth.NewAuthInterceptor(db),
 		),
 		viewerv1.Register(db, logger.With(zap.String("service", "viewerv1"))),
 		// TODO: Once we add more frontends maybe it would be better to move
