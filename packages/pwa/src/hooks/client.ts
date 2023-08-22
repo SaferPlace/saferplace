@@ -7,12 +7,16 @@ export default function useClient<T extends ServiceType>(service: T): PromiseCli
     return React.useMemo(() => getClient(service), [service])
 }
 
+export function getEndpoint(): string {
+    return localStorage.getItem('backend') ?? import.meta.env.VITE_BACKEND
+}
+
 /**
  * getClient creates a new client
  * @param service that the client should connect to.
  */
 export function getClient<T extends ServiceType>(service: T): PromiseClient<T> {
-    const backend = localStorage.getItem('backend') ?? import.meta.env.VITE_BACKEND
+    const backend = getEndpoint()
     const transport = createConnectTransport({
         baseUrl: backend
     })
