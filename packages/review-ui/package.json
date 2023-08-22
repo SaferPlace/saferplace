@@ -23,7 +23,7 @@
     "@mui/material": "^5.14.5",
     "@saferplace/api": "0.0.14",
     "leaflet": "^1.9.4",
-    "oidc-react": "^3.0.4",
+    "oidc-react": "^3.2.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.0",
