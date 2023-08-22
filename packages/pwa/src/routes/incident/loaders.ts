@@ -22,7 +22,7 @@ export async function incidentsInRadiusLoader({request}: LoaderFunctionArgs): Pr
 
     const radius = Number.parseFloat(getQuery(request, 'radius') ?? '10000000')
     const lat = ((): number => {
-        const p = getQuery(request, 'lan')
+        const p = getQuery(request, 'lat')
         return p ? Number.parseFloat(p) : user.lat ?? 0
     })()
     const lon = ((): number => {
