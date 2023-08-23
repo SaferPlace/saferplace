@@ -4,6 +4,7 @@ export default {
   common: {
     email: "E-mail",
     backend: "Backend",
+    cdn: "Sieć Dostarczania Zawartości",
     description: "Opis",
     submittedAtTime: "Złożone o godzinie",
     reportStatus: "Status Zdarzenia",
@@ -11,6 +12,7 @@ export default {
   action: {
     useEmail: "Użyj e-mail",
     useBackend: "Użyj Backendu",
+    useCDN: "Użyj CDNa",
     viewIncidents: "Zobacz Zdarzenia",
     viewIncident: "Zobacz Zdarzenie",
     submitReport: "Zgłos Zdarzenie",

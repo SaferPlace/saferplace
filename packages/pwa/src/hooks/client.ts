@@ -11,6 +11,10 @@ export function getEndpoint(): string {
     return localStorage.getItem('backend') ?? import.meta.env.VITE_BACKEND
 }
 
+export function getCDNEndpoint(): string {
+    return localStorage.getItem('cdn') ?? import.meta.env.VITE_CDN
+}
+
 /**
  * getClient creates a new client
  * @param service that the client should connect to.

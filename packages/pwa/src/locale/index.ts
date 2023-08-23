@@ -2,6 +2,7 @@ export type TranslationFile = {
     common: Partial<{
         email: string
         backend: string
+        cdn: string
         description: string
         submittedAtTime: string
         reportStatus: string
@@ -9,6 +10,7 @@ export type TranslationFile = {
     action: Partial<{
         useEmail: string
         useBackend: string
+        useCDN: string
         viewIncidents: string
         viewIncident: string
         submitReport: string

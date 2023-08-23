@@ -4,6 +4,7 @@ export default {
     common: {
         email: "Email",
         backend: "Backend",
+        cdn: "Content Delivery Network",
         description: "Description",
         submittedAtTime: "Submission Time",
         reportStatus: "Report Status",
@@ -11,6 +12,7 @@ export default {
     action: {
         useEmail: "Use Email",
         useBackend: "Use Backend",
+        useCDN: "Use CDN",
         viewIncidents: "View Incidents",
         viewIncident: "View Incident",
         submitReport: "Submit Report",
