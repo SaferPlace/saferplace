@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 export default function Login() {
     const [email, setEmail] =  React.useState<string>(localStorage.getItem('email') ?? '')
     const [backend, setBackend] = React.useState<string>(localStorage.getItem('backend') ?? import.meta.env.VITE_BACKEND)
+    const [cdn, setCDN] = React.useState<string>(localStorage.getItem('cdn') ?? import.meta.env.VITE_CDN)
     const navigate = useNavigate()
     const { t } = useTranslation()
 
@@ -29,6 +30,10 @@ export default function Login() {
 
     const saveBackend = () => {
         localStorage.setItem('backend', backend)
+    }
+
+    const saveCDN = () => {
+        localStorage.setItem('cdn', cdn)
     }
 
     return (
@@ -59,25 +64,44 @@ export default function Login() {
                             <Typography>{t('phrases:addToHomeScreen')}</Typography>
                         </Stack>
                     </Paper>
-                    <Stack direction={{ xs: 'column', sm: 'row' }}>
-                        <TextField
-                            label={t('common:backend')}
-                            variant='outlined'
-                            fullWidth
-                            type='url'
-                            value={backend}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                setBackend(e.target.value)
-                            }}
-                        />
-                        <Button
-                            variant='contained'
-                            fullWidth
-                            onClick={saveBackend}
-                        >
-                            {t('action:useBackend')}
-                        </Button>
+                    <Paper sx={{ padding: 4 }}>
+                        <Stack spacing={2} direction='column'>
+                            <TextField
+                                label={t('common:backend')}
+                                variant='outlined'
+                                fullWidth
+                                type='url'
+                                value={backend}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                    setBackend(e.target.value)
+                                }}
+                            />
+                            <Button
+                                variant='contained'
+                                fullWidth
+                                onClick={saveBackend}
+                            >
+                                {t('action:useBackend')}
+                            </Button>
+                            <TextField
+                                label={t('common:cdn')}
+                                variant='outlined'
+                                fullWidth
+                                type='url'
+                                value={cdn}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                    setCDN(e.target.value)
+                                }}
+                            />
+                            <Button
+                                variant='contained'
+                                fullWidth
+                                onClick={saveCDN}
+                            >
+                                {t('action:useCDN')}
+                            </Button>
                         </Stack>
+                    </Paper>
                 </Stack>
             </Container>
         </Box>

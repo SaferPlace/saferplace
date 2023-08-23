@@ -39,6 +39,7 @@ export default function Report() {
         setError(null)
 
         let imageID = ''
+        // Only try to upload the image if it has been specified.
         if (image) {
             imageID = await uploadImage()
                 .catch(err => setError(err))
@@ -54,6 +55,7 @@ export default function Report() {
             incident: {
                 description,
                 coordinates,
+                imageId: imageID,
             }
         })
             .then(resp => {

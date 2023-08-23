@@ -1,9 +1,10 @@
 import { Incident, Resolution } from "@saferplace/api/incident/v1/incident_pb"
-import { Alert, AlertColor, Box, Card, CardContent, Stack, TextField, Typography } from "@mui/material"
+import { Alert, AlertColor, Box, Card, CardContent, CardMedia, Stack, TextField, Typography } from "@mui/material"
 import { useLoaderData } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 
 import { AccessTime, Done, Warning, HighlightOff } from '@mui/icons-material'
+import { getCDNEndpoint } from "../../hooks/client"
 
 export type Props = {
     incident: Incident
@@ -65,6 +66,13 @@ export default function IncidentDetails() {
                 </Alert>
             )}
             <Card>
+                { incident.imageId && (
+                    <CardMedia
+                        component='img'
+                        src={`${getCDNEndpoint()}/images/${incident.imageId}`}
+                        width='100%'
+                    />
+                )}
                 <CardContent>
                     <Stack spacing={2}>
                         <Typography variant='h4'>{t('common:description')}</Typography>
