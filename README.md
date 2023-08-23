@@ -23,13 +23,8 @@ for the ease of development
 
 For now these instructions are not well optimized
 
-Add the following to your env, `direnv` recommended, but do not commit the `.envrc`.
-
-```sh
-export MINIO_ENDPOINT=localhost:9000
-export MINIO_ACCESS_KEY=saferplace
-export MINIO_SECRET_KEY=supersecret
-```
+To load the recommended Env Vars automatically use `direnv`. If there are any secret variables
+eg. OAuth credentials, use the `.secret.envrc`.
 
 ### Running
 
@@ -41,6 +36,15 @@ Open up 3 tabs in your terminal
 # ~/workdir/realtime
 $ docker compose up
 ```
+
+Enable anonymous readonly access on minio
+
+- Navigate to http://localhost:9001/buckets/images/admin/prefix using the credentials from `.envrc`.
+- There click on `Add Access Rule` and add an anonymous access rule
+  - `Prefix` - `/`
+  - `Access` - `readonly`
+
+This will ensure that you need authentication to write to the bucket, but not to read.
 
 #### Go Backend
 
