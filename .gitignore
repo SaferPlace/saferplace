@@ -3,3 +3,6 @@
 
 eslint_report.json
 node_modules/
+
+# Ignore the secret env vars
+.secret.env
