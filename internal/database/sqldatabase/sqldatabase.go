@@ -10,12 +10,20 @@ import (
 	"time"
 
 	"api.safer.place/incident/v1"
+	"api.safer.place/viewer/v1"
+
 	"github.com/google/uuid"
 	"github.com/kelseyhightower/envconfig"
 	"golang.org/x/exp/slices"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"safer.place/realtime/internal/database"
 )
+
+// Config of the SQLDatabase
+type Config struct {
+	Driver string `default:"sqlite3"`
+	DSN    string `default:"file:incidents.db"`
+}
 
 // Database contains the database connection
 type Database struct {
@@ -31,6 +39,7 @@ type Database struct {
 	incidentsInRadiusStmt      *sql.Stmt
 	saveSessionStmt            *sql.Stmt
 	isValidSessionStmt         *sql.Stmt
+	alertingIncidentsStmt      *sql.Stmt
 }
 
 // New creates a new SQL database
@@ -89,6 +98,10 @@ func New() (*Database, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to prepare isValidSession query: %w", err)
 	}
+	alertingIncidentsStmt, err := db.Prepare(alertingIncidentsQuery)
+	if err != nil {
+		return nil, fmt.Errorf("unable to prepare isValidSession query: %w", err)
+	}
 
 	return &Database{
 		db:                         db,
@@ -102,6 +115,7 @@ func New() (*Database, error) {
 		incidentsInRadiusStmt:      incidentsInRadiusStmt,
 		saveSessionStmt:            saveSessionStmt,
 		isValidSessionStmt:         isValidSessionStmt,
+		alertingIncidentsStmt:      alertingIncidentsStmt,
 	}, nil
 }
 
@@ -191,25 +205,13 @@ func (db *Database) ViewIncident(ctx context.Context, id string) (*incident.Inci
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	inc := &incident.Incident{Coordinates: &incident.Coordinates{}}
-	var resStr string
-	var ts int64
-	if err := tx.Stmt(db.viewIncidentStmt).QueryRow(id).Scan(
-		&inc.Id,
-		&ts,
-		&inc.Description,
-		&inc.Coordinates.Lat,
-		&inc.Coordinates.Lon,
-		&resStr,
-		&inc.ImageId,
-	); err != nil {
+	inc, err := scanIncident(tx.Stmt(db.viewIncidentStmt).QueryRow(id))
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, database.ErrDoesNotExist
 		}
 		return nil, fmt.Errorf("unable to get incident info: %w", err)
 	}
-	inc.Resolution = incident.Resolution(incident.Resolution_value[resStr])
-	inc.Timestamp = &timestamppb.Timestamp{Seconds: ts}
 
 	// TODO: Get comments
 	rows, err := tx.Stmt(db.viewCommentsStmt).QueryContext(ctx, id)
@@ -257,25 +259,13 @@ func (db *Database) IncidentsWithoutReview(ctx context.Context) ([]*incident.Inc
 
 	incidents := make([]*incident.Incident, 0)
 	for rows.Next() {
-		inc := &incident.Incident{Coordinates: &incident.Coordinates{}}
-		var resStr string
-		var ts int64
-		if err := rows.Scan(
-			&inc.Id,
-			&ts,
-			&inc.Description,
-			&inc.Coordinates.Lat,
-			&inc.Coordinates.Lon,
-			&resStr,
-			&inc.ImageId,
-		); err != nil {
+		inc, err := scanIncident(rows)
+		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return nil, database.ErrDoesNotExist
 			}
 			return nil, fmt.Errorf("unable to get incident info: %w", err)
 		}
-		inc.Resolution = incident.Resolution(incident.Resolution_value[resStr])
-		inc.Timestamp = &timestamppb.Timestamp{Seconds: ts}
 		incidents = append(incidents, inc)
 	}
 
@@ -297,25 +287,13 @@ func (db *Database) IncidentsInRadius(
 
 	incidents := make([]*incident.Incident, 0)
 	for rows.Next() {
-		inc := &incident.Incident{Coordinates: &incident.Coordinates{}}
-		var resStr string
-		var ts int64
-		if err := rows.Scan(
-			&inc.Id,
-			&ts,
-			&inc.Description,
-			&inc.Coordinates.Lat,
-			&inc.Coordinates.Lon,
-			&resStr,
-			&inc.ImageId,
-		); err != nil {
+		inc, err := scanIncident(rows)
+		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				return nil, database.ErrDoesNotExist
 			}
 			return nil, fmt.Errorf("unable to get incident info: %w", err)
 		}
-		inc.Resolution = incident.Resolution(incident.Resolution_value[resStr])
-		inc.Timestamp = &timestamppb.Timestamp{Seconds: ts}
 		incidents = append(incidents, inc)
 	}
 
@@ -340,6 +318,39 @@ func (db *Database) SaveSession(ctx context.Context, session string) error {
 	}
 
 	return nil
+}
+
+// AlertingIncidents returns the incidents which are alerting and match the filters
+func (db *Database) AlertingIncidents(
+	ctx context.Context, since time.Time, region *viewer.Region,
+) ([]*incident.Incident, error) {
+	rows, err := db.alertingIncidentsStmt.QueryContext(ctx,
+		since.Unix(),
+		region.North,
+		region.South,
+		region.East,
+		region.West,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return []*incident.Incident{}, nil
+		}
+		return nil, fmt.Errorf("unable list incidents: %w", err)
+	}
+
+	incidents := make([]*incident.Incident, 0)
+	for rows.Next() {
+		inc, err := scanIncident(rows)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, database.ErrDoesNotExist
+			}
+			return nil, fmt.Errorf("unable to get incident info: %w", err)
+		}
+		incidents = append(incidents, inc)
+	}
+
+	return incidents, nil
 }
 
 // IsValidSession determines if the session is still active and within date.
@@ -385,10 +396,29 @@ func (s ByTimestamp) Len() int           { return len(s) }
 func (s ByTimestamp) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s ByTimestamp) Less(i, j int) bool { return s[i].Timestamp < s[j].Timestamp }
 
-// Config of the SQLDatabase
-type Config struct {
-	Driver string `default:"sqlite3"`
-	DSN    string `default:"file:incidents.db"`
+type scanner interface {
+	Scan(dest ...any) error
+}
+
+func scanIncident(s scanner) (*incident.Incident, error) {
+	inc := &incident.Incident{Coordinates: &incident.Coordinates{}}
+	var resolution string
+	var timestamp int64
+	if err := s.Scan(
+		&inc.Id,
+		&timestamp,
+		&inc.Description,
+		&inc.Coordinates.Lat,
+		&inc.Coordinates.Lon,
+		&resolution,
+		&inc.ImageId,
+	); err != nil {
+		return nil, err
+	}
+	inc.Resolution = incident.Resolution(incident.Resolution_value[resolution])
+	inc.Timestamp = &timestamppb.Timestamp{Seconds: timestamp}
+
+	return inc, nil
 }
 
 var createTableQuery = `
@@ -476,3 +506,31 @@ VALUES
 var isValidSessionQuery = `
 SELECT expiry FROM sessions WHERE id=?;
 `
+
+// alertingIncidentsQuery gets only incidents since the provided timestamp,
+// in the provided region
+// parameters:
+//
+//	since
+//	north
+//	south
+//	east
+//	west
+var alertingIncidentsQuery = fmt.Sprintf(`
+SELECT *
+FROM incidents
+WHERE
+	resolution=%q
+	AND
+		timestamp > ?
+	AND
+		lat < ?
+	AND
+		lat > ?
+	AND
+		lon > ?
+	AND
+		lon < ?
+`,
+	incident.Resolution_RESOLUTION_ALERTED,
+)
