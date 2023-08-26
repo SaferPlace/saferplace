@@ -3,8 +3,10 @@ package database
 import (
 	"context"
 	"errors"
+	"time"
 
 	"api.safer.place/incident/v1"
+	"api.safer.place/viewer/v1"
 
 	// Register accepted sql databases
 	_ "github.com/mattn/go-sqlite3"
@@ -29,4 +31,5 @@ type Database interface {
 	IncidentsInRadius(context.Context, *incident.Coordinates, float64) ([]*incident.Incident, error)
 	SaveSession(context.Context, string) error
 	IsValidSession(context.Context, string) error
+	AlertingIncidents(context.Context, time.Time, *viewer.Region) ([]*incident.Incident, error)
 }
