@@ -24,6 +24,10 @@ export type TranslationFile = {
         contactAuthoritiesFirst: string
         usingReportLocation: string
         incidentDescriptionPlaceholder: string
+        alertsNearby: string
+        week: string
+        day: string
+        hour: string
     }>,
     /** resolution are not partial as we need the description for every one */
     resolution: {

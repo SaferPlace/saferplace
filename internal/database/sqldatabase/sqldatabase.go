@@ -328,8 +328,8 @@ func (db *Database) AlertingIncidents(
 		since.Unix(),
 		region.North,
 		region.South,
-		region.East,
 		region.West,
+		region.East,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -514,8 +514,8 @@ SELECT expiry FROM sessions WHERE id=?;
 //	since
 //	north
 //	south
-//	east
 //	west
+//	east
 var alertingIncidentsQuery = fmt.Sprintf(`
 SELECT *
 FROM incidents

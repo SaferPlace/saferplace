@@ -26,5 +26,9 @@ export default {
     contactAuthoritiesFirst: "Jeśli Twoje życie lub inne osoby są zagrożone, przed utworzeniem zgłoszenia skontaktuj się ze służbami ratunkowymi pod numerem 112!",
     usingReportLocation: "Twoja lokalizacja wykorzystana do utworzenia raportu:",
     incidentDescriptionPlaceholder: "Opisz, co się dzieje",
+    alertsNearby: "Alerty w Pobliżu",
+    week: "Tydzień",
+    day: "Dzień",
+    hour: "Godzina",
   }
 } as TranslationFile
