@@ -26,6 +26,10 @@ export default {
         contactAuthoritiesFirst: "If your life or others is at risk, contact emergency services at 112 before creating a report!",
         usingReportLocation: "Using your location to create the report:",
         incidentDescriptionPlaceholder: "Describe what is happening",
+        alertsNearby: "Alerts Nearby",
+        week: "Week",
+        day: "Day",
+        hour: "Hour",
     },
     resolution: {
         inReview: "In Review",

@@ -6,7 +6,7 @@ Content-Type: application/json
     "region": {
         "north": 53.35,
         "south": 53.34,
-        "west": -6.30,
-        "east": -6.29
+        "west": -6.31,
+        "east": -6.30
     }
 }

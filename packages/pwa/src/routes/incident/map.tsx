@@ -1,16 +1,15 @@
 import { Coordinates, Incident } from "@saferplace/api/incident/v1/incident_pb"
 import { MapContainer, Marker, TileLayer, LayerGroup, Popup } from 'react-leaflet'
 import { useMapEvents } from 'react-leaflet/hooks'
-import { Box, Button, Fab, Skeleton, Stack } from "@mui/material"
+import { Box, Button, Skeleton } from "@mui/material"
 import React from 'react'
 import { usePosition } from "../../hooks/position"
 import useClient from "../../hooks/client"
 import { ViewerService } from "@saferplace/api/viewer/v1/viewer_connect"
 import 'leaflet/dist/leaflet.css'
 import { useTranslation } from "react-i18next"
-import { NavLink, useNavigate } from "react-router-dom"
-import { Add } from "@mui/icons-material"
-import { List } from "@mui/icons-material"
+import { useNavigate } from "react-router-dom"
+import ActionStack from "../../components/actionstack"
 
 export type Props = {
     center?: Coordinates
@@ -46,7 +45,7 @@ export default function Map() {
         })
             .then(resp => setIncidents(resp.incidents))
             .catch(err => console.error(err))
-    }, [center])
+    }, [client, zoom, center])
     
     return (
         <Box sx={{
@@ -63,9 +62,7 @@ export default function Map() {
                 flexGrow: 1,
             }),
         }}>
-            <Stack
-                direction='row'
-                spacing={2}
+            <Box
                 sx={(theme) => ({
                     zIndex: 10000,
                     position: 'absolute',
@@ -73,24 +70,12 @@ export default function Map() {
                     right: theme.spacing(2),
                 })}
             >
-                <Fab
-                    variant='extended'
-                    component={NavLink}
-                    to={`/incidents?radius=${zoomToRadius(center?.lat ?? 0, zoom)}&lat=${center?.lat ?? 0}&lon=${center?.lon ?? 0}`}
-                >
-                    <List sx={{ marginInlineEnd: 1 }} />
-                    {t('action:viewIncidents')}
-                </Fab>
-                <Fab
-                    component={NavLink}
-                    variant='extended'
-                    color='primary'
-                    to='/report'
-                >
-                    <Add sx={{ marginInlineEnd: 1 }} />
-                    {t('action:submitReport')}
-                </Fab>
-            </Stack>
+                <ActionStack
+                    direction={{ xs: 'column', md: 'row'}}
+                    center={center ?? new Coordinates()}
+                    radius={zoomToRadius(center?.lat ?? 0, zoom)}
+                />
+            </Box>
             { center ? (
                 <MapContainer center={latlon(center)} zoom={zoom}>
                     <TileLayer
