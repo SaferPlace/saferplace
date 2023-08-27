@@ -28,6 +28,8 @@ export type TranslationFile = {
         week: string
         day: string
         hour: string
+        showAdvancedOptions: string
+        advancedDevelopmentOnly: string
     }>,
     /** resolution are not partial as we need the description for every one */
     resolution: {

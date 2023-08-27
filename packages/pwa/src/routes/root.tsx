@@ -13,7 +13,7 @@ export default function Root() {
             console.info('user is not authenticated, redirecting to login')
             navigate('/login')
         }
-    }, [user])
+    }, [navigate, user])
    
     return (
         <Box>
@@ -28,7 +28,7 @@ export default function Root() {
                         sx={{ textDecoration: 'none' }}
                     >
                         SaferPlace
-                        </Typography>
+                    </Typography>
                     <IconButton
                         component={NavLink}
                         to='/map'

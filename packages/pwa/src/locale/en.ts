@@ -30,6 +30,8 @@ export default {
         week: "Week",
         day: "Day",
         hour: "Hour",
+        showAdvancedOptions: 'Show Advanced Options',
+        advancedDevelopmentOnly: 'These options are created only for development purposes and should typically not be changed unless you know what you are doing.',
     },
     resolution: {
         inReview: "In Review",
