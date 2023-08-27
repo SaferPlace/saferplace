@@ -1,7 +1,8 @@
-import { Box, Button, Container, Paper, Stack, TextField, Toolbar, Typography } from "@mui/material"
-import React  from "react"
+import { Alert, Box, Button, Container, Fade, FormControlLabel, Paper, Stack, Switch, TextField, Toolbar, Typography, useTheme } from "@mui/material"
+import React, { ChangeEvent }  from "react"
 import { useNavigate } from "react-router-dom"
 import { useTranslation } from 'react-i18next'
+import { Warning } from "@mui/icons-material"
 
 export default function Login() {
     const [email, setEmail] =  React.useState<string>(localStorage.getItem('email') ?? '')
@@ -9,19 +10,18 @@ export default function Login() {
     const [cdn, setCDN] = React.useState<string>(localStorage.getItem('cdn') ?? import.meta.env.VITE_CDN)
     const navigate = useNavigate()
     const { t } = useTranslation()
+    const theme = useTheme()
+    const [ showAdvanced, setShowAdvanced ] = React.useState<boolean>(false)
 
     React.useEffect(() => {
-        const themeColor = document.querySelector('meta[name="theme-color"]')?.getAttribute('content') ?? ''
         const backgroundColor = document.body.style.backgroundColor
 
-        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', 'blue')
-        document.body.style.backgroundColor = 'blue'
+        document.body.style.backgroundColor = theme.palette.primary.main
 
         return () => {
-            document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColor)
             document.body.style.backgroundColor = backgroundColor
         }
-    }, [])
+    }, [theme])
 
     const saveEmail = () => {
         localStorage.setItem('email', email)
@@ -34,6 +34,10 @@ export default function Login() {
 
     const saveCDN = () => {
         localStorage.setItem('cdn', cdn)
+    }
+
+    const handleChangedAdvanced = (e: ChangeEvent<HTMLInputElement>) => {
+        setShowAdvanced(e.target.checked)
     }
 
     return (
@@ -64,44 +68,64 @@ export default function Login() {
                             <Typography>{t('phrases:addToHomeScreen')}</Typography>
                         </Stack>
                     </Paper>
-                    <Paper sx={{ padding: 4 }}>
-                        <Stack spacing={2} direction='column'>
-                            <TextField
-                                label={t('common:backend')}
-                                variant='outlined'
-                                fullWidth
-                                type='url'
-                                value={backend}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                    setBackend(e.target.value)
-                                }}
+                    <FormControlLabel
+                        sx={{ justifyContent: 'center'}}
+                        control={
+                            <Switch
+                                checked={showAdvanced}
+                                onChange={handleChangedAdvanced}
+                                color='success'
                             />
-                            <Button
-                                variant='contained'
-                                fullWidth
-                                onClick={saveBackend}
-                            >
-                                {t('action:useBackend')}
-                            </Button>
-                            <TextField
-                                label={t('common:cdn')}
-                                variant='outlined'
-                                fullWidth
-                                type='url'
-                                value={cdn}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                    setCDN(e.target.value)
-                                }}
-                            />
-                            <Button
-                                variant='contained'
-                                fullWidth
-                                onClick={saveCDN}
-                            >
-                                {t('action:useCDN')}
-                            </Button>
-                        </Stack>
-                    </Paper>
+                        }
+                        label={
+                            <Typography color='white'>
+                                {t('phrases:showAdvancedOptions')}
+                            </Typography>
+                        }
+                    />
+                    <Fade in={showAdvanced}>
+                        <Paper sx={{ padding: 4 }}>
+                            <Stack spacing={2} direction='column'>
+                                <Alert variant='standard' color='warning' icon={<Warning />}>
+                                    {t('phrases:advancedDevelopmentOnly')}
+                                </Alert>
+                                <TextField
+                                    label={t('common:backend')}
+                                    variant='outlined'
+                                    fullWidth
+                                    type='url'
+                                    value={backend}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                        setBackend(e.target.value)
+                                    }}
+                                />
+                                <Button
+                                    variant='contained'
+                                    fullWidth
+                                    onClick={saveBackend}
+                                >
+                                    {t('action:useBackend')}
+                                </Button>
+                                <TextField
+                                    label={t('common:cdn')}
+                                    variant='outlined'
+                                    fullWidth
+                                    type='url'
+                                    value={cdn}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                        setCDN(e.target.value)
+                                    }}
+                                />
+                                <Button
+                                    variant='contained'
+                                    fullWidth
+                                    onClick={saveCDN}
+                                >
+                                    {t('action:useCDN')}
+                                </Button>
+                            </Stack>
+                        </Paper>
+                    </Fade>
                 </Stack>
             </Container>
         </Box>

@@ -30,5 +30,7 @@ export default {
     week: "Tydzień",
     day: "Dzień",
     hour: "Godzina",
+    showAdvancedOptions: 'Pokaż Zaawansowane Ustawienia',
+    advancedDevelopmentOnly: 'Te opcje są stworzone wyłącznie do celów programistycznych i zazwyczaj nie powinny być zmieniane, chyba że wiesz co robisz.',
   }
 } as TranslationFile
