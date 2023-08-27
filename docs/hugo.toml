@@ -1,0 +1,4 @@
+baseURL = 'https://safer.place'
+languageCode = 'en-us'
+title = 'Safer Place'
+theme = 'ananke'
