@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"google.golang.org/protobuf/proto"
-	"safer.place/realtime/internal/queue"
+	"safer.place/internal/queue"
 )
 
 type Queue[T proto.Message] struct {

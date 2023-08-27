@@ -14,7 +14,7 @@ import (
 	"api.safer.place/viewer/v1/viewerconnect"
 	"connectrpc.com/connect"
 	"go.uber.org/zap"
-	"safer.place/realtime/internal/database"
+	"safer.place/internal/database"
 )
 
 const (

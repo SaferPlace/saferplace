@@ -3,8 +3,8 @@
 package main
 
 import (
-	cmd "safer.place/realtime/internal/cmd/realtime"
-	"safer.place/realtime/internal/config"
+	cmd "safer.place/internal/cmd/realtime"
+	"safer.place/internal/config"
 )
 
 func main() {

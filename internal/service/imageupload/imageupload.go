@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"go.uber.org/zap"
-	"safer.place/realtime/internal/storage"
+	"safer.place/internal/storage"
 )
 
 // Service is the image upload service
