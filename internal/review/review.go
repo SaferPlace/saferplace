@@ -7,9 +7,9 @@ import (
 
 	"api.safer.place/incident/v1"
 	"go.uber.org/zap"
-	"safer.place/realtime/internal/database"
-	"safer.place/realtime/internal/notifier"
-	"safer.place/realtime/internal/queue"
+	"safer.place/internal/database"
+	"safer.place/internal/notifier"
+	"safer.place/internal/queue"
 )
 
 // Review is a big wrapper around incoming reviews

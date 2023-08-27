@@ -1,4 +1,4 @@
-module safer.place/realtime
+module safer.place
 
 go 1.20
 

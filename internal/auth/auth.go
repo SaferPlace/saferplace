@@ -12,7 +12,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"safer.place/realtime/internal/database"
+	"safer.place/internal/database"
 )
 
 var (

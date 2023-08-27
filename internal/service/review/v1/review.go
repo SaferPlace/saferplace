@@ -10,7 +10,7 @@ import (
 
 	"connectrpc.com/connect"
 	"go.uber.org/zap"
-	"safer.place/realtime/internal/database"
+	"safer.place/internal/database"
 
 	"api.safer.place/incident/v1"
 	pb "api.safer.place/review/v1"

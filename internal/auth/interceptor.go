@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"connectrpc.com/connect"
-	"safer.place/realtime/internal/database"
+	"safer.place/internal/database"
 )
 
 // NewAuthInterceptor checks each request for valid session.

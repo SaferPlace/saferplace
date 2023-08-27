@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"safer.place/realtime/internal/queue"
+	"safer.place/internal/queue"
 
 	ipb "api.safer.place/incident/v1"
 	pb "api.safer.place/report/v1"

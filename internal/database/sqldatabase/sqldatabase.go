@@ -16,7 +16,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"golang.org/x/exp/slices"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"safer.place/realtime/internal/database"
+	"safer.place/internal/database"
 )
 
 // Config of the SQLDatabase
