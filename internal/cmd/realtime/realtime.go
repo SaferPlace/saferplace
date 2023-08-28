@@ -94,15 +94,19 @@ func Run(cfg *config.Config) (err error) {
 		dn,
 	)
 
-	services := []webserver.Service{
-		reportv1.Register(q, logger.With(zap.String("service", "reportv1"))),
+	userAuthMiddleware := auth.NewUserAuthMiddleware()
+
+	services := []webserver.Service{}
+	// Reviewer services
+	services = append(services,
+		// Review Services
 		reviewv1.Register(
 			db,
 			logger.With(zap.String("service", "reviewv1")),
 			// TODO: Re-enable once we know what we are doing.
 			// auth.NewAuthInterceptor(db),
 		),
-		viewerv1.Register(db, logger.With(zap.String("service", "viewerv1"))),
+
 		// TODO: Once we add more frontends maybe it would be better to move
 		// somewhere better.
 		auth.Register("/review/", &auth.Config{
@@ -113,9 +117,16 @@ func Run(cfg *config.Config) (err error) {
 			ClientSecret: cfg.Auth.ClientSecret,
 			DB:           db,
 		}),
-		// TODO: Add authentication
-		imageupload.Register(logger.With(zap.String("service", "imageupload")), store),
-	}
+	)
+	// User services
+	services = append(services, ServiceMiddleware(
+		[]middleware.Middleware{userAuthMiddleware},
+		[]webserver.Service{
+			reportv1.Register(q, logger.With(zap.String("service", "reportv1"))),
+			viewerv1.Register(db, logger.With(zap.String("service", "viewerv1"))),
+			imageupload.Register(logger.With(zap.String("service", "imageupload")), store),
+		},
+	)...)
 
 	middlewares := []middleware.Middleware{
 		middleware.Cors(nil),
@@ -174,4 +185,23 @@ func loggingMiddleware(log *zap.Logger) middleware.Middleware {
 			h.ServeHTTP(w, r)
 		})
 	}
+}
+
+// ServiceMiddleware wraps all provided services with the middleware.
+func ServiceMiddleware(
+	middlewares []middleware.Middleware, services []webserver.Service,
+) []webserver.Service {
+	wrapped := make([]webserver.Service, 0, len(services))
+
+	for _, service := range services {
+		path, handler := service()
+		for _, middleware := range middlewares {
+			handler = middleware(handler)
+		}
+		wrapped = append(wrapped, func() (string, http.Handler) {
+			return path, handler
+		})
+	}
+
+	return wrapped
 }
