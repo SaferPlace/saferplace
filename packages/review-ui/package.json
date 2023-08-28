@@ -21,7 +21,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.3",
     "@mui/material": "^5.14.5",
-    "@saferplace/api": "^0.0.16",
+    "@saferplace/api": "^0.0.17",
     "leaflet": "^1.9.4",
     "oidc-react": "^3.2.2",
     "react": "^18.2.0",
