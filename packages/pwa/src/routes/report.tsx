@@ -5,7 +5,7 @@ import { SendReportRequest, SendReportResponse } from '@saferplace/api/report/v1
 import { useLoaderData, useNavigate } from "react-router-dom"
 import React from "react"
 import { usePosition } from "../hooks/position"
-import { getEndpoint } from "../hooks/client";
+import { uploadImage } from "../hooks/client";
 import PhotoCapture from "../components/photocapture";
 
 export type Props = {
@@ -23,17 +23,6 @@ export default function Report() {
     const [ error, setError ] = React.useState<Error | null>(null)
     const [ image, setImage ] = React.useState<File|undefined>()
 
-    const uploadImage = async (): Promise<string> => {
-        if (!image) { return '' }
-        const data = new FormData()
-        data.append('image', image)
-        return fetch(`${getEndpoint()}/v1/upload`, {
-            method: 'POST',
-            body: data,
-        })
-            .then(resp => resp.text())
-    }
-
     const onSubmit = async() => {
         setSubmitted(true)
         setError(null)
@@ -41,7 +30,7 @@ export default function Report() {
         let imageID = ''
         // Only try to upload the image if it has been specified.
         if (image) {
-            imageID = await uploadImage()
+            imageID = await uploadImage(image)
                 .catch(err => setError(err))
                 ?? ''
             if (imageID === '') return
