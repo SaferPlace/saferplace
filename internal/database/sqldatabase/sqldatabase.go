@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"sort"
 	"time"
 
@@ -296,8 +295,6 @@ func (db *Database) IncidentsInRadius(
 		}
 		incidents = append(incidents, inc)
 	}
-
-	log.Printf("checking all incidents at center %v: %v", center, incidents)
 
 	// Delete all incidents which are outside of the given radius
 	incidents = slices.DeleteFunc(incidents, func(i *incident.Incident) bool {

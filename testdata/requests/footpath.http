@@ -1,5 +1,6 @@
 POST http://localhost:8001/report.v1.ReportService/SendReport
 Content-Type: application/json
+X-Email: "testdata@safer.place"
 
 {
     "incident": {

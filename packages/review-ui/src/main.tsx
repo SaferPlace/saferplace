@@ -9,13 +9,19 @@ import { ReviewService } from '@saferplace/api/review/v1/review_connect'
 import { BasicIncidentDetails } from '@saferplace/api/review/v1/review_pb'
 import ErrorPage from './routes/error'
 
-import { createPromiseClient } from '@bufbuild/connect'
+import { createPromiseClient, Interceptor } from '@bufbuild/connect'
 import { createConnectTransport } from '@bufbuild/connect-web'
+
+const addReviewerEmailInterceptor: Interceptor = (next) => async (req) => {
+  req.header.set('email', localStorage.getItem('email') ?? '')
+  return await next(req)
+}
 
 const client = createPromiseClient(
   ReviewService,
   createConnectTransport({
     baseUrl: import.meta.env.VITE_BACKEND,
+    interceptors: [addReviewerEmailInterceptor],
   }),
 )
 

@@ -51,8 +51,8 @@ func (s *Service) ReviewIncident(
 	)
 
 	comment := &incident.Comment{
-		// TODO: Replace with authenticated user
-		AuthorId:  "voy", // TODO: Deduct from the authentication credentials.
+		// TODO: Actually perform authentication and authorization and not just blindly accept this.
+		AuthorId:  req.Header().Get("email"),
 		Timestamp: time.Now().Unix(),
 		Message:   req.Msg.Comment,
 	}
