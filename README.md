@@ -1,7 +1,32 @@
-# SaferPlace Realtime Monorepo
+# SaferPlace
 
-This monorepo is designed to temporarily house saferplace realtime application
-for the ease of development
+Trying to make the world a little bit safer
+
+> **warning**
+> SaferPlace is not associated with any official institutions.
+
+## What is SaferPlace
+
+SaferPlace is a platform created to report incidents which happen in the area. So often there are
+crimes and violations in your surrounding which are not reported. Originally designed to tell you
+which areas are safe to live in for college based on the Gardai crime report data, we are now
+expanding the idea by letting you report safety infractions.
+
+The project is currently in **heavy** development, but if you would like to see what we are
+currently working on, take a look at our [Project Milestones] and [Project Backlog]
+
+The current plan is to have the site fully functional by the end of 2023 with the website being
+available at [https://safer.place]
+
+## Old Code
+
+- If you would like to see the original implementation of saferplace, take a look at
+  [Original Saferplace].
+- There was an attempt at rewriting the original codebase, but that attempt was then replaced by
+  "realtime saferplace" (community sourced, this repository). If you would like to see it, the
+  efforts are kept on the [saferplace-v1 Branch]
+
+---
 
 ## Local Development
 
@@ -11,7 +36,7 @@ for the ease of development
 
 ### Workflow
 
-1. Find a task from the [Github Project Backlog]
+1. Find a task from the [Project Backlog]
 2. Make a PR and reference the issue its closing
 3. Ensure the PRs are passing
 
@@ -59,9 +84,20 @@ $ go run ./cmd/realtime
 
 ```sh
 # ~/workdir/realtime/packages/pwa
-$ pnpm run dev
+$ pnpm run dev --host
+```
+
+#### Reviewer App
+
+```sh
+# ~/workdir/realtime/packages/review-ui
+$ pnpm run dev --host
 ```
 
 Then proceed to http://localhost:5173/login, and change the backend to `http://localhost:8001`.
 
-[Github Project Backlog]: https://github.com/orgs/SaferPlace/projects/2/
+[Project Backlog]: https://github.com/orgs/SaferPlace/projects/2/
+[Project Milestones]: https://github.com/SaferPlace/saferplace/milestones
+[https://safer.place]: https://safer.place
+[Original Saferplace]: https://github.com/saferplace/original
+[saferplace-v1 Branch]: https://github.com/SaferPlace/saferplace/tree/saferplace-v1
