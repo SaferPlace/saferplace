@@ -11,7 +11,7 @@ import './i18n'
 import Home from './routes/home'
 import IncidentList from './routes/incident/list'
 import Incident from './routes/incident/single'
-import { incidentLoader, incidentsInRadiusLoader } from './routes/incident/loaders'
+import { incidentLoader, incidentsInRegionLoader } from './routes/incident/loaders'
 import Report from './routes/report'
 import { reportLoader } from './routes/loaders'
 import Map from './routes/incident/map'
@@ -38,7 +38,7 @@ const router = createBrowserRouter([
             Component: Home,
           }, {
             path: '/incidents',
-            loader: incidentsInRadiusLoader,
+            loader: incidentsInRegionLoader,
             Component: IncidentList,
           }, {
             path: 'incident/:id',

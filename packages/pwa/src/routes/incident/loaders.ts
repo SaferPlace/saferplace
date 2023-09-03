@@ -4,40 +4,51 @@ import { ViewerService } from "@saferplace/api/viewer/v1/viewer_connect"
 import { IncidentsProps } from "./list"
 import { Props as SingleProps } from './single'
 import { getPosition } from "../../hooks/position"
+import { regionsInBounds } from "../../hooks/incidents"
+import { LatLngBounds } from "leaflet"
+import { Incident } from "@saferplace/api/incident/v1/incident_pb"
 
 function getQuery(request: Request, query: string): string | null {
     const url = new URL(request.url)
     return url.searchParams.get(query)
 }
 
-/**
- * incidentInRadiusLoader gets the incident in a given radius from the center. It uses the
- * search parameters to get the radius, lattitude and longitude.
- */
-export async function incidentsInRadiusLoader({request}: LoaderFunctionArgs): Promise<IncidentsProps> {
+export async function incidentsInRegionLoader({request}: LoaderFunctionArgs): Promise<IncidentsProps> {
     const client = getClient(ViewerService)
 
     const user = await getPosition()
     console.debug('user position', user)
 
-    const radius = Number.parseFloat(getQuery(request, 'radius') ?? '10000000')
-    const lat = ((): number => {
-        const p = getQuery(request, 'lat')
-        return p ? Number.parseFloat(p) : user.lat ?? 0
+    const north = ((): number => {
+        const p = getQuery(request, 'north')
+        return p ? Number.parseFloat(p): (user.lat ?? 0)
     })()
-    const lon = ((): number => {
-        const p = getQuery(request, 'lon')
-        return p ? Number.parseFloat(p) : user.lon ?? 0
+    const south = ((): number => {
+        const p = getQuery(request, 'south')
+        return p ? Number.parseFloat(p): (user.lat ?? 0)
+    })()
+    const west = ((): number => {
+        const p = getQuery(request, 'west')
+        return p ? Number.parseFloat(p): (user.lon ?? 0)
+    })()
+    const east = ((): number => {
+        const p = getQuery(request, 'east')
+        return p ? Number.parseFloat(p): (user.lon ?? 0)
     })()
 
-    return client.viewInRadius({
-        radius: radius,
-        center: {
-            lat,
-            lon,
-        },
-    })
-        .then(resp => ({incidents: resp.incidents, radius, center: {lat,lon}} as IncidentsProps))
+    const bounds = new LatLngBounds([south, west], [north, east])
+    const incidents: Incident[] = []
+
+    for (const region of regionsInBounds(bounds)) {
+        console.info('getting region', region.toJsonString())
+        client.viewInRegion({region})
+            .then(resp => incidents.push(...resp.incidents))
+            .catch(err => console.error(err))
+    }
+
+    console.log(incidents)
+    
+    return { incidents, bounds }
 }
 
 /**

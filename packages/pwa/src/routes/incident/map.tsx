@@ -1,51 +1,32 @@
-import { Coordinates, Incident } from "@saferplace/api/incident/v1/incident_pb"
+import { Coordinates } from "@saferplace/api/incident/v1/incident_pb"
 import { MapContainer, Marker, TileLayer, LayerGroup, Popup } from 'react-leaflet'
 import { useMapEvents } from 'react-leaflet/hooks'
 import { Box, Button, Skeleton } from "@mui/material"
 import React from 'react'
 import { usePosition } from "../../hooks/position"
-import useClient from "../../hooks/client"
-import { ViewerService } from "@saferplace/api/viewer/v1/viewer_connect"
 import 'leaflet/dist/leaflet.css'
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import ActionStack from "../../components/actionstack"
-
-export type Props = {
-    center?: Coordinates
-    setCenter: (coordinates: Coordinates) => void
-    setZoom: (zoom: number) => void
-}
+import { LatLngBounds } from "leaflet"
+import { useIncidents } from "../../hooks/incidents"
 
 export default function Map() {
     const [ initialPosition ] = usePosition()
-    const [ incidents, setIncidents ] = React.useState<Incident[]>([])
     const [ center, setCenter ] = React.useState<Coordinates | undefined>()
     const { t } = useTranslation()
     const navigate = useNavigate()
-    
-    const [ zoom, setZoom ] = React.useState<number>(13)
-    const client = useClient(ViewerService)
+    const [bounds, setBounds] = React.useState<LatLngBounds | undefined>()
 
+    const incidents = useIncidents(bounds)
+
+    // Wait for the initialPosition to become available
     React.useEffect(() => {
-        if (!initialPosition) {
-            return
-        }
+        if (!initialPosition) return
+        if (center) return
+
         setCenter(new Coordinates(initialPosition))
-    }, [initialPosition])
-
-    React.useEffect(() => {
-        if (!center) {
-            return
-        }
-        console.debug(`viewing incident at ${center.lat}, ${center.lon} at zoom ${zoom} with radius ${zoomToRadius(center.lat, zoom)}m`)
-        client.viewInRadius({
-            radius: zoomToRadius(center.lat, zoom), // Static until we know how to convert zoom to radius
-            center,
-        })
-            .then(resp => setIncidents(resp.incidents))
-            .catch(err => console.error(err))
-    }, [client, zoom, center])
+    }, [center, initialPosition])
     
     return (
         <Box sx={{
@@ -72,12 +53,11 @@ export default function Map() {
             >
                 <ActionStack
                     direction={{ xs: 'column', md: 'row'}}
-                    center={center ?? new Coordinates()}
-                    radius={zoomToRadius(center?.lat ?? 0, zoom)}
+                    bounds={bounds}
                 />
             </Box>
             { center ? (
-                <MapContainer center={latlon(center)} zoom={zoom}>
+                <MapContainer center={latlon(center)} zoom={13}>
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -94,17 +74,14 @@ export default function Map() {
                                 </Popup>
                             </Marker>
                         )) }
-                        {/* Enable for debugging */}
-                        {/* <Circle center={latlon(center)} radius={zoomToRadius(center?.lat ?? 0, zoom)} /> */}
                     </LayerGroup>
-                    <MapDescendant
-                        center={new Coordinates(initialPosition)}
+                    <MapControl
                         setCenter={setCenter}
-                        setZoom={setZoom}
+                        setBounds={setBounds}
                     />
                 </MapContainer>
             ) : (
-                <Skeleton />
+                <Skeleton width='100%' height='100%' />
             )}
             
         </Box>
@@ -112,13 +89,17 @@ export default function Map() {
     )
 }
 
-function MapDescendant({setCenter, setZoom }: Props) {
+export type MapControlProps = {
+    setCenter: (coordinates: Coordinates) => void
+    setBounds: (bounds: LatLngBounds) => void
+}
+
+function MapControl({setCenter, setBounds }: MapControlProps) {
     const map = useMapEvents({
-        zoomend: () => {
-            setZoom(map.getZoom())
-        },
         moveend: () => {
             const {lat, lng} = map.getCenter()
+            // TODO: Add a diff based algorithm to only get the new regions which changed.
+            setBounds(map.getBounds())
             setCenter(new Coordinates({lat, lon: lng}))
         },
     })
@@ -127,8 +108,4 @@ function MapDescendant({setCenter, setZoom }: Props) {
 
 function latlon(coords: Coordinates | undefined): [number, number] {
     return [coords?.lat || 0, coords?.lon || 0]
-}
-
-function zoomToRadius(lat: number, zoom: number): number {
-    return ((80_000_000*Math.cos(lat * Math.PI / 180)) / Math.pow(2, zoom)) * 2
 }
