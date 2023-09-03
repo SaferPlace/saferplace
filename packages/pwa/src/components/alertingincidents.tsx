@@ -19,6 +19,7 @@ export default function AlertingIncidents() {
     const [ since, setSince ] = React.useState<string>('day')
 
     React.useEffect(() => {
+        if (!position) return
         const sinceTimestamp = new Date(Date.now())
         let numberOfHours = 24
         switch (since) {
@@ -27,12 +28,12 @@ export default function AlertingIncidents() {
             case 'hour': numberOfHours = 1; break
         }
         sinceTimestamp.setHours(sinceTimestamp.getHours() - numberOfHours)
-
+        
         const region = new Region({
-            north: (Math.round((position?.lat ?? 0) * 100) / 100),
-            south: ((Math.round((position?.lat ?? 0) * 100)-1) / 100),
-            west: ((Math.round((position?.lon ?? 0) * 100)-1) / 100),
-            east: ((Math.round((position?.lon ?? 0) * 100)) / 100),
+            north: Math.round((position?.lat ?? 0) * 100),
+            south: Math.round((position?.lat ?? 0) * 100) - 1,
+            west: Math.round((position?.lon ?? 0) * 100),
+            east: Math.round((position?.lon ?? 0) * 100) + 1,
         })
         console.info(`region: ${region.toJsonString()}, since ${sinceTimestamp.toLocaleDateString()}`)
         client.viewAlerting({
