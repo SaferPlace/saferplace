@@ -6,7 +6,7 @@ require (
 	api.safer.place v0.0.18
 	connectrpc.com/connect v1.11.1
 	github.com/bwmarrin/discordgo v0.27.1
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.3.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/minio/minio-go/v7 v7.0.63
