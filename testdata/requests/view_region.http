@@ -1,9 +1,8 @@
-POST http://localhost:8001/viewer.v1.ViewerService/ViewAlerting
+POST http://localhost:8001/viewer.v1.ViewerService/ViewInRegion
 Content-Type: application/json
 X-Email: testdata@safer.place
 
 {
-    "since": "2023-01-01T00:00:00.0Z",
     "region": {
         "north": 5335,
         "south": 5334,

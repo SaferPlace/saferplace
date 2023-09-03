@@ -10,25 +10,21 @@ import (
 func TestValidateRegion(t *testing.T) {
 	testCases := map[*viewer.Region]error{
 		// good cases
-		{}:                           nil,
-		{North: 53.35, South: 53.34}: nil,
-		{North: 53.35, South: 53.34, West: -6.30, East: -6.29}: nil,
+		{}:                         nil,
+		{North: 5335, South: 5334}: nil,
+		{North: 5335, South: 5334, West: -630, East: -629}: nil,
 		// out of bounds
-		{North: -190}: &RegionError{"north", -190, errOutOfBounds},
-		{North: 190}:  &RegionError{"north", 190, errOutOfBounds},
-		{South: -190}: &RegionError{"south", -190, errOutOfBounds},
-		{South: 190}:  &RegionError{"south", 190, errOutOfBounds},
+		{North: -19000}: &RegionError{"north", -19000, errOutOfBounds},
+		{North: 19000}:  &RegionError{"north", 19000, errOutOfBounds},
+		{South: -19000}: &RegionError{"south", -19000, errOutOfBounds},
+		{South: 19000}:  &RegionError{"south", 19000, errOutOfBounds},
 		// invalid bounds
-		{North: 53.34, South: 53.35}: &RegionError{"north-south", -0.01, errInvalidBounds},
-		{East: -0.01}:                &RegionError{"east-west", -0.01, errInvalidBounds},
-		// not in increments
-		{North: 1.1, South: 1.1}:     nil,
-		{North: 1.11, South: 1.11}:   nil,
-		{North: 1.111, South: 1.111}: &RegionError{"north", 1.111, errNotInIncrements},
+		{North: 5334, South: 5335}: &RegionError{"north-south", -1, errInvalidBounds},
+		{East: -1}:                 &RegionError{"east-west", -1, errInvalidBounds},
 		// region too big
-		{North: 53, South: 52}:       &RegionError{"north-south", 1, errTooBig},
-		{North: 53.3, South: 53.2}:   &RegionError{"north-south", 0.1, errTooBig},
-		{North: 53.35, South: 53.33}: &RegionError{"north-south", 0.02, errTooBig},
+		{North: 5300, South: 5200}: &RegionError{"north-south", 100, errTooBig},
+		{North: 5330, South: 5320}: &RegionError{"north-south", 10, errTooBig},
+		{North: 5335, South: 5333}: &RegionError{"north-south", 2, errTooBig},
 	}
 
 	for in, want := range testCases {
