@@ -29,6 +29,7 @@ type Database interface {
 	ViewIncident(context.Context, string) (*incident.Incident, error)
 	IncidentsWithoutReview(context.Context) ([]*incident.Incident, error)
 	IncidentsInRadius(context.Context, *incident.Coordinates, float64) ([]*incident.Incident, error)
+	IncidentsInRegion(context.Context, time.Time, *viewer.Region) ([]*incident.Incident, error)
 	SaveSession(context.Context, string) error
 	IsValidSession(context.Context, string) error
 	AlertingIncidents(context.Context, time.Time, *viewer.Region) ([]*incident.Incident, error)

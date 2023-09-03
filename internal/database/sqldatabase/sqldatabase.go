@@ -36,6 +36,7 @@ type Database struct {
 	viewCommentsStmt           *sql.Stmt
 	incidentsWithoutReviewStmt *sql.Stmt
 	incidentsInRadiusStmt      *sql.Stmt
+	incidentsInRegionStmt      *sql.Stmt
 	saveSessionStmt            *sql.Stmt
 	isValidSessionStmt         *sql.Stmt
 	alertingIncidentsStmt      *sql.Stmt
@@ -89,6 +90,10 @@ func New() (*Database, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to prepare incidentsInRadius query: %w", err)
 	}
+	incidentsInRegionStmt, err := db.Prepare(incidentsInRegionQuery)
+	if err != nil {
+		return nil, fmt.Errorf("unable to prepare incidentsInRegion query: %w", err)
+	}
 	saveSessionStmt, err := db.Prepare(saveSessionQuery)
 	if err != nil {
 		return nil, fmt.Errorf("unable to prepare saveComment query: %w", err)
@@ -115,6 +120,7 @@ func New() (*Database, error) {
 		saveSessionStmt:            saveSessionStmt,
 		isValidSessionStmt:         isValidSessionStmt,
 		alertingIncidentsStmt:      alertingIncidentsStmt,
+		incidentsInRegionStmt:      incidentsInRegionStmt,
 	}, nil
 }
 
@@ -304,6 +310,39 @@ func (db *Database) IncidentsInRadius(
 	return incidents, nil
 }
 
+// IncidentsInRegion returns all the incidents in the specified region
+func (db *Database) IncidentsInRegion(
+	ctx context.Context, since time.Time, region *viewer.Region,
+) ([]*incident.Incident, error) {
+	rows, err := db.incidentsInRegionStmt.QueryContext(ctx,
+		since.Unix(),
+		region.North/100,
+		region.South/100,
+		region.West/100,
+		region.East/100,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return []*incident.Incident{}, nil
+		}
+		return nil, fmt.Errorf("unable list incidents: %w", err)
+	}
+
+	incidents := make([]*incident.Incident, 0)
+	for rows.Next() {
+		inc, err := scanIncident(rows)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, database.ErrDoesNotExist
+			}
+			return nil, fmt.Errorf("unable to get incident info: %w", err)
+		}
+		incidents = append(incidents, inc)
+	}
+
+	return incidents, nil
+}
+
 // SaveSession in the database
 // TODO: Decide should the database layer decide on the session expiry or should it be
 // determined somewhere else.
@@ -323,10 +362,10 @@ func (db *Database) AlertingIncidents(
 ) ([]*incident.Incident, error) {
 	rows, err := db.alertingIncidentsStmt.QueryContext(ctx,
 		since.Unix(),
-		region.North,
-		region.South,
-		region.West,
-		region.East,
+		region.North/100,
+		region.South/100,
+		region.West/100,
+		region.East/100,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -428,6 +467,8 @@ CREATE TABLE IF NOT EXISTS incidents (
 	resolution TEXT NOT NULL,
 	image TEXT NOT NULL
 );
+CREATE INDEX IF NOT EXISTS lat ON incidents (lat);
+CREATE INDEX IF NOT EXISTS lon ON incidents (lon);
 
 CREATE TABLE IF NOT EXISTS comments (
 	id TEXT PRIMARY KEY,
@@ -503,6 +544,35 @@ VALUES
 var isValidSessionQuery = `
 SELECT expiry FROM sessions WHERE id=?;
 `
+
+// incidentsInRegionQuery gets only incidents since the provided timestamp,
+// in the provided region
+// parameters:
+//
+//	since
+//	north
+//	south
+//	west
+//	east
+var incidentsInRegionQuery = fmt.Sprintf(`
+SELECT *
+FROM incidents
+WHERE
+	(resolution=%q OR resolution=%q)
+	AND
+		timestamp > ?
+	AND
+		lat < ?
+	AND
+		lat > ?
+	AND
+		lon > ?
+	AND
+		lon < ?
+`,
+	incident.Resolution_RESOLUTION_ACCEPTED,
+	incident.Resolution_RESOLUTION_ALERTED,
+)
 
 // alertingIncidentsQuery gets only incidents since the provided timestamp,
 // in the provided region

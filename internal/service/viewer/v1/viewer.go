@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"api.safer.place/viewer/v1"
@@ -18,9 +17,9 @@ import (
 )
 
 const (
-	// RegionDegreesMin specifies how granular the requests for region can be. Too broad
+	// RegionIncrements specifies how granular the requests for region can be. Too broad
 	// and we can't correcty cache, too granular and they are breaching our location privacy.
-	RegionDegreesIncrement = 0.01 // ~1.11km at the equator
+	RegionIncrements = 1 // ~1.11km at the equator
 )
 
 // Service is the viewer service
@@ -42,6 +41,8 @@ func Register(
 	}
 }
 
+// ViewInRadius gets incidents in the specified radius
+// Deprecated: Use [ViewInRegion] instead as respects privacy better.
 func (s *Service) ViewInRadius(
 	ctx context.Context,
 	req *connect.Request[viewer.ViewInRadiusRequest],
@@ -68,6 +69,43 @@ func (s *Service) ViewInRadius(
 
 	return connect.NewResponse(&viewer.ViewInRadiusResponse{
 		Incidents: incidents,
+	}), nil
+}
+
+// ViewInRegion shows all incidents in the specified region.
+func (s *Service) ViewInRegion(
+	ctx context.Context,
+	req *connect.Request[viewer.ViewInRegionRequest],
+) (
+	*connect.Response[viewer.ViewInRegionResponse],
+	error,
+) {
+	if err := validateRegion(req.Msg.Region); err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument,
+			fmt.Errorf("invalid region: %w", err),
+		)
+	}
+
+	// Default to using one week in the past.
+	// TODO: Allow to be configurable using configuration.
+	// TODO: Handle alerting incidents long in the past.
+	since := req.Msg.Since.AsTime()
+	if since.Unix() == 0 {
+		since = time.Now().Add(-7 * 24 * time.Hour)
+	}
+
+	s.log.Info("viewing incidents in region",
+		zap.Any("region", req.Msg.Region),
+		zap.String("since", since.String()),
+	)
+
+	inc, err := s.db.IncidentsInRegion(ctx, since, req.Msg.Region)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeUnavailable, err)
+	}
+
+	return connect.NewResponse(&viewer.ViewInRegionResponse{
+		Incidents: inc,
 	}), nil
 }
 
@@ -135,10 +173,9 @@ func (s *Service) ViewAlerting(
 }
 
 var (
-	errOutOfBounds     = errors.New("not a valid earth coordinate")
-	errNotInIncrements = errors.New("not in specified increments")
-	errInvalidBounds   = errors.New("invalid bounds")
-	errTooBig          = errors.New("region is too big")
+	errOutOfBounds   = errors.New("not a valid earth coordinate")
+	errInvalidBounds = errors.New("invalid bounds")
+	errTooBig        = errors.New("region is too big")
 )
 
 // RegionError describes errors which are caused by invalid regions.
@@ -162,10 +199,10 @@ func (e RegionError) Unwrap() error {
 //     the increment)
 func validateRegion(region *viewer.Region) error {
 	// north and south
-	if -90 > region.North || region.North > 90 {
+	if -9000 > region.North || region.North > 9000 {
 		return &RegionError{"north", region.North, errOutOfBounds}
 	}
-	if -90 > region.South || region.South > 90 {
+	if -9000 > region.South || region.South > 9000 {
 		return &RegionError{"south", region.South, errOutOfBounds}
 	}
 	if region.North < region.South {
@@ -173,46 +210,23 @@ func validateRegion(region *viewer.Region) error {
 	}
 
 	// east and west
-	if 180 > region.East && region.East > 180 {
+	if 18000 > region.East && region.East > 18000 {
 		return &RegionError{"east", region.East, errOutOfBounds}
 	}
-	if -90 > region.West && region.West > 90 {
+	if -9000 > region.West && region.West > 9000 {
 		return &RegionError{"west", region.West, errOutOfBounds}
 	}
 	if region.East < region.West {
 		return &RegionError{"east-west", region.East - region.West, errInvalidBounds}
 	}
 
-	// validate each coordinate is within the cardinality, round if within acceptable offset.
-	if !isIncrement(region.North) {
-		return &RegionError{"north", region.North, errNotInIncrements}
-	}
-	if !isIncrement(region.South) {
-		return &RegionError{"south", region.South, errNotInIncrements}
-	}
-	if !isIncrement(region.East) {
-		return &RegionError{"east", region.East, errNotInIncrements}
-	}
-	if !isIncrement(region.West) {
-		return &RegionError{"west", region.West, errNotInIncrements}
-	}
-
 	// validate that they are at most RegionDegreesIncrement apart
-	if diff := region.North - region.South; diff > RegionDegreesIncrement {
+	if diff := region.North - region.South; diff > RegionIncrements {
 		return &RegionError{"north-south", diff, errTooBig}
 	}
-	if diff := region.East - region.West; diff > RegionDegreesIncrement {
+	if diff := region.East - region.West; diff > RegionIncrements {
 		return &RegionError{"east-west", diff, errTooBig}
 	}
 
 	return nil
-}
-
-// isIncrement validates that the provided lattitude/longitude is within the provided increments.
-// TODO: Fix this. This method is stupid inefficent but it's late.
-func isIncrement(x float64) bool {
-	s := strings.TrimRight(fmt.Sprint(x), "0")
-	return len(strings.TrimPrefix(s, fmt.Sprintf("%.0f", x))) == 0 ||
-		len(strings.TrimPrefix(s, fmt.Sprintf("%.1f", x))) == 0 ||
-		len(strings.TrimPrefix(s, fmt.Sprintf("%.2f", x))) == 0
 }
