@@ -136,8 +136,8 @@ importers:
         specifier: ^5.14.6
         version: 5.14.6(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.2.21)(react-dom@18.2.0)(react@18.2.0)
       '@saferplace/api':
-        specifier: ^0.0.17
-        version: 0.0.17
+        specifier: ^0.0.18
+        version: 0.0.18
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
@@ -2199,12 +2199,6 @@ packages:
       picomatch: 2.3.1
       rollup: 2.79.1
     dev: true
-
-  /@saferplace/api@0.0.17:
-    resolution: {integrity: sha512-woB2UGuzC2nXjSbmiDY6fdG09RT1pjIBsC/LT2RnDiVUrqygh4lAhJfYA8tbUb+tcOfXpElgFoenICjxnom0pw==, tarball: https://npm.pkg.github.com/download/@saferplace/api/0.0.17/cb77af53037cb22933b798e9cd5e42526271670e}
-    dependencies:
-      '@bufbuild/protobuf': 1.3.0
-    dev: false
 
   /@saferplace/api@0.0.18:
     resolution: {integrity: sha512-GRYYQTYjPYog/gN7VW7SCO3OqncsZzog37TRuQOqNsft2ziY52sJfe3s4Slu9j55uocXaonaDOZJlykirgI3rA==, tarball: https://npm.pkg.github.com/download/@saferplace/api/0.0.18/d93082057e619207857b8c10f6275e42529b149b}
