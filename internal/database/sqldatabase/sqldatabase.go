@@ -12,7 +12,6 @@ import (
 	"api.safer.place/viewer/v1"
 
 	"github.com/google/uuid"
-	"github.com/kelseyhightower/envconfig"
 	"golang.org/x/exp/slices"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"safer.place/internal/database"
@@ -20,8 +19,8 @@ import (
 
 // Config of the SQLDatabase
 type Config struct {
-	Driver string `default:"sqlite3"`
-	DSN    string `default:"file:incidents.db"`
+	Driver string `yaml:"driver" default:"sqlite3"`
+	DSN    string `yaml:"dsn" default:"file:incidents.db"`
 }
 
 // Database contains the database connection
@@ -43,11 +42,7 @@ type Database struct {
 }
 
 // New creates a new SQL database
-func New() (*Database, error) {
-	var cfg Config
-	if err := envconfig.Process("SQL", &cfg); err != nil {
-		return nil, fmt.Errorf("unable to parse SQL config: %w", err)
-	}
+func New(cfg Config) (*Database, error) {
 	db, err := sql.Open(cfg.Driver, cfg.DSN)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open database: %w", err)

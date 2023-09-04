@@ -77,7 +77,7 @@ Go backend is currently running as a single app. It will run on `http://localhos
 
 ```sh
 # ~/workdir/realtime
-$ go run ./cmd/realtime
+$ go run ./cmd/saferplace
 ```
 
 #### PWA Frontend

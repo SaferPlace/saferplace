@@ -12,6 +12,37 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var registeredDatabases map[string]NewDatabaseFn = make(map[string]NewDatabaseFn)
+
+var (
+	ErrDatabaseExists       = errors.New("database already exists")
+	ErrDatabaseDoesNotExist = errors.New("databased does not exist")
+)
+
+// NewDatabaseFn is a function used to register a new database.
+type NewDatabaseFn func(config any) (Database, error)
+
+// Register the given database name
+func Register(name string, fn NewDatabaseFn) error {
+	if _, exists := registeredDatabases[name]; exists {
+		return ErrDatabaseExists
+	}
+	registeredDatabases[name] = fn
+
+	return nil
+}
+
+// Open creates a new database based on the name, or returns and error if the database does not
+// exist.
+func Open(name string, config any) (Database, error) {
+	fn, exists := registeredDatabases[name]
+	if !exists {
+		return nil, ErrDatabaseDoesNotExist
+	}
+
+	return fn(config)
+}
+
 var (
 	// ErrAlreadyExists is returned when we try to add the incident but it
 	// already exists
