@@ -1,0 +1,12 @@
+# Example configuration used for saferplace.
+# Since the file is loaded after the environment variables, we can override any value we want
+# but we have to be careful that we don't override a secret value.
+webserver:
+  cors_domains: [] # allow all for development
+
+storage:
+  provider: minio
+  minio:
+    endpoint: localhost:9000
+    access_key: saferplace
+    # secret_key: Configured though env vars.
