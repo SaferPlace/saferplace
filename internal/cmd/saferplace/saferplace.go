@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"safer.place/internal/auth"
@@ -49,6 +51,7 @@ func Run(components []Component, cfg *config.Config) (err error) {
 			userServices,
 		)...,
 	)
+	services = append(services, metrics(deps.metrics))
 
 	middlewares := []middleware.Middleware{
 		middleware.Cors(cfg.Webserver.CORSDomains),
@@ -93,4 +96,12 @@ func ServiceMiddleware(
 	}
 
 	return wrapped
+}
+
+func metrics(reg *prometheus.Registry) func() (string, http.Handler) {
+	return func() (string, http.Handler) {
+		return "/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{
+			EnableOpenMetrics: true,
+		})
+	}
 }

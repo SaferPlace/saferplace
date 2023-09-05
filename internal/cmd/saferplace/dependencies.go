@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"api.safer.place/incident/v1"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"go.uber.org/zap"
 	"safer.place/internal/config"
 	"safer.place/internal/database"
@@ -64,6 +66,7 @@ func StringsToDependencies(ss []string) []Dependency {
 }
 
 type dependencies struct {
+	metrics  *prometheus.Registry
 	logger   *zap.Logger
 	database database.Database
 	queue    queue.Queue[*incident.Incident]
@@ -77,12 +80,19 @@ func createDependencies(cfg *config.Config, components []Component) (*dependenci
 	wantedDependencies := neededDependencies(components)
 
 	deps := &dependencies{
-		logger: newLogger(cfg),
+		logger:  newLogger(cfg),
+		metrics: prometheus.NewRegistry(),
 	}
 
 	deps.logger.Debug("initializing dependencies",
 		zap.Strings("components", ComponentsToStrings(components)),
 		zap.Strings("dependencies", dependenciesToStrings(wantedDependencies)),
+	)
+
+	deps.metrics.MustRegister(
+		collectors.NewGoCollector(),
+		collectors.NewBuildInfoCollector(),
+		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 	)
 
 	for dep, fn := range map[Dependency]registerDependencyFn{
