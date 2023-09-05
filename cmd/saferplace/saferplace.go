@@ -19,10 +19,10 @@ func run() error {
 	configFile := flag.String("config", "", "Config file")
 	flag.Parse()
 
-	components := []string{"consumer", "review", "report", "uploader", "viewer"}
+	components := saferplace.AllComponents()
 	if len(flag.Args()) > 0 {
 		if flag.Arg(0) != "all" {
-			components = strings.Split(flag.Arg(1), ",")
+			components = saferplace.StringsToComponents(strings.Split(flag.Arg(0), ","))
 		}
 	}
 

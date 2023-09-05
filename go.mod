@@ -1,6 +1,6 @@
 module safer.place
 
-go 1.20
+go 1.21
 
 require (
 	api.safer.place v0.0.18
