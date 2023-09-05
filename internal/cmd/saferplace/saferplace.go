@@ -4,103 +4,40 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"time"
 
 	"go.uber.org/zap"
-	"golang.org/x/exp/slices"
 	"golang.org/x/sync/errgroup"
 	"safer.place/internal/auth"
 	"safer.place/internal/config"
-	"safer.place/internal/review"
 	"safer.place/webserver"
-	"safer.place/webserver/certificate"
-	"safer.place/webserver/certificate/insecure"
-	"safer.place/webserver/certificate/temporary"
 	"safer.place/webserver/middleware"
-
-	// Registered services
-	"safer.place/internal/service/imageupload"
-	reportv1 "safer.place/internal/service/report/v1"
-	reviewv1 "safer.place/internal/service/review/v1"
-	viewerv1 "safer.place/internal/service/viewer/v1"
 )
 
-func Run(components []string, cfg *config.Config) (err error) {
-	logger := newLogger(cfg)
-	defer func() { _ = logger.Sync() }()
+// Service is webserver registered function to create a new service, aliased for convenience
+type Service = webserver.Service
 
-	logger.Debug("using components",
-		zap.Strings("components", components),
-	)
+func Run(components []Component, cfg *config.Config) (err error) {
+	// Setup all deps
+	deps, err := createDependencies(cfg, components)
+	if err != nil {
+		return
+	}
+	defer func() { _ = deps.logger.Sync() }()
 
 	eg, ctx := errgroup.WithContext(context.Background())
 
-	// Setup all dependencies
-	db, err := newDatabase(cfg.Database)
+	if err := createHeadlessComponents(ctx, cfg, components, deps, eg); err != nil {
+		return fmt.Errorf("unable to create headless components: %w", err)
+	}
+
+	reviewerServices, err := createServices(ctx, cfg, components, deps, reviewerComponents)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to create reviewer services: %w", err)
 	}
 
-	incidentQueue, err := newQueue(cfg.Queue)
+	userServices, err := createServices(ctx, cfg, components, deps, userComponents)
 	if err != nil {
-		return err
-	}
-
-	store, err := newStorage(cfg.Storage)
-	if err != nil {
-		return err
-	}
-
-	notifier, err := newNotififer(cfg.Notifier, logger)
-	if err != nil {
-		return err
-	}
-
-	// Setup Components
-	if slices.Contains(components, "consumer") {
-		consumer := review.New(
-			logger.With(zap.String("component", "review")),
-			incidentQueue,
-			db,
-			notifier,
-		)
-
-		eg.Go(func() error {
-			return consumer.Run(ctx)
-		})
-	}
-
-	reviewerServices := []webserver.Service{}
-
-	if slices.Contains(components, "review") {
-		reviewerServices = append(reviewerServices,
-			reviewv1.Register(
-				db,
-				logger.With(zap.String("service", "reviewv1")),
-				// TODO: Re-enable once we know what we are doing.
-				// auth.NewAuthInterceptor(db),
-			),
-		)
-	}
-
-	userServices := []webserver.Service{}
-
-	if slices.Contains(components, "report") {
-		userServices = append(userServices,
-			reportv1.Register(incidentQueue, logger.With(zap.String("service", "reportv1"))),
-		)
-	}
-
-	if slices.Contains(components, "uploader") {
-		userServices = append(userServices,
-			imageupload.Register(logger.With(zap.String("service", "imageupload")), store),
-		)
-	}
-
-	if slices.Contains(components, "viewer") {
-		userServices = append(userServices,
-			viewerv1.Register(db, logger.With(zap.String("service", "viewerv1"))),
-		)
+		return fmt.Errorf("unable to create user services: %w", err)
 	}
 
 	// Setup Webserver based on the provided services
@@ -117,23 +54,13 @@ func Run(components []string, cfg *config.Config) (err error) {
 		middleware.Cors(cfg.Webserver.CORSDomains),
 	}
 
-	var certProvider certificate.Provider
-	switch cfg.Webserver.Cert.Provider {
-	case "temporary":
-		certProvider = temporary.NewProvider(temporary.Config{
-			ValidFor: time.Hour,
-		})
-	case "insecure":
-		certProvider = insecure.NewProvider()
-	}
-
-	tlsConfig, err := certProvider.Provide(context.Background(), cfg.Webserver.Cert.Domains)
+	tlsConfig, err := newTLSConfig(cfg.Webserver.Cert)
 	if err != nil {
-		return fmt.Errorf("unable to create TLS cert: %w", err)
+		return err
 	}
 
 	srv, err := webserver.New(
-		webserver.Logger(logger.With(zap.String("component", "server"))),
+		webserver.Logger(deps.logger.With(zap.String("component", "server"))),
 		webserver.Services(services...),
 		webserver.TLSConfig(tlsConfig),
 		webserver.Middlewares(middlewares...),

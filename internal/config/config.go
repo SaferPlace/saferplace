@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/yaml.v3"
@@ -15,7 +16,7 @@ import (
 type Config struct {
 	// File from which the config was parsed. Empty if the file was not used.
 	File  string
-	Debug bool `yaml:"debug" envconfig:"DEBUG"`
+	Debug bool `yaml:"debug"`
 
 	Webserver WebserverConfig `yaml:"webserver"`
 	Queue     QueueConfig     `yaml:"queue"`
@@ -48,7 +49,7 @@ type DatabaseConfig struct {
 type StorageConfig struct {
 	Provider string `yaml:"provider" default:"minio"`
 
-	Minio minio.Config `yaml:"minio"`
+	Minio *minio.Config `yaml:"minio"`
 }
 
 // Notifier can be configured to notify a third party of a incident.
@@ -60,6 +61,7 @@ type NotifierConfig struct {
 type CertConfig struct {
 	Provider string   `default:"insecure"`
 	Domains  []string `default:"localhost"`
+	ValidFor Duration `yaml:"valid_for" default:"1h"`
 }
 
 // AuthConfig is used to configure OAuth
@@ -91,4 +93,35 @@ func Parse(file string) (*Config, error) {
 	cfg.File = file
 
 	return cfg, nil
+}
+
+type Duration time.Duration
+
+func (d *Duration) UnmarshalYAML(unmarshal func(any) error) error {
+	var s string
+	if err := unmarshal(&s); err != nil {
+		return err
+	}
+
+	nd, err := time.ParseDuration(s)
+	if err != nil {
+		return err
+	}
+
+	*d = Duration(nd)
+	return nil
+}
+
+func (d *Duration) UnmarshalText(text []byte) error {
+	nd, err := time.ParseDuration(string(text))
+	if err != nil {
+		return err
+	}
+
+	*d = Duration(nd)
+	return nil
+}
+
+func (d *Duration) String() string {
+	return time.Duration(*d).String()
 }

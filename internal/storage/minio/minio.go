@@ -26,7 +26,7 @@ type Storage struct {
 	bucket string
 }
 
-func New(cfg Config) (*Storage, error) {
+func New(cfg *Config) (*Storage, error) {
 	c, err := minio.New(cfg.Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(cfg.AccessKey, string(cfg.SecretKey), ""),
 		Secure: cfg.Secure,
