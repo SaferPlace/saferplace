@@ -11,6 +11,7 @@ import (
 	"connectrpc.com/connect"
 	"go.uber.org/zap"
 	"safer.place/internal/database"
+	"safer.place/internal/service"
 
 	"api.safer.place/incident/v1"
 	pb "api.safer.place/review/v1"
@@ -27,9 +28,8 @@ type Service struct {
 func Register(
 	db database.Database,
 	log *zap.Logger,
-	interceptors ...connect.Interceptor,
-) func() (string, http.Handler) {
-	return func() (string, http.Handler) {
+) service.Service {
+	return func(interceptors ...connect.Interceptor) (string, http.Handler) {
 		return connectpb.NewReviewServiceHandler(&Service{
 			db:  db,
 			log: log,
