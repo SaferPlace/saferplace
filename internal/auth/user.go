@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"connectrpc.com/connect"
-	"safer.place/webserver/middleware"
+	"github.com/saferplace/webserver-go/middleware"
 )
 
 var (

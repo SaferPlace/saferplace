@@ -11,6 +11,9 @@ import (
 	"api.safer.place/incident/v1"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
+	"github.com/saferplace/webserver-go/certificate"
+	"github.com/saferplace/webserver-go/certificate/insecure"
+	"github.com/saferplace/webserver-go/certificate/temporary"
 	"go.uber.org/zap"
 	"safer.place/internal/config"
 	"safer.place/internal/database"
@@ -21,9 +24,6 @@ import (
 	"safer.place/internal/queue/memory"
 	"safer.place/internal/storage"
 	"safer.place/internal/storage/minio"
-	"safer.place/webserver/certificate"
-	"safer.place/webserver/certificate/insecure"
-	"safer.place/webserver/certificate/temporary"
 )
 
 var errProviderNotFound = errors.New("provider not found")

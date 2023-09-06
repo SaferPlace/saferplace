@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/saferplace/webserver-go"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 	"golang.org/x/sync/errgroup"
 	"safer.place/internal/config"
 	"safer.place/internal/review"
-	"safer.place/webserver"
 
 	// Registered services
 	"safer.place/internal/service/imageupload"

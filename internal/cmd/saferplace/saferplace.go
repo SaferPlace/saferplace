@@ -4,15 +4,16 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	_ "net/http/pprof"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/saferplace/webserver-go"
+	"github.com/saferplace/webserver-go/middleware"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"safer.place/internal/auth"
 	"safer.place/internal/config"
-	"safer.place/webserver"
-	"safer.place/webserver/middleware"
 )
 
 // Service is webserver registered function to create a new service, aliased for convenience
@@ -51,7 +52,11 @@ func Run(components []Component, cfg *config.Config) (err error) {
 			userServices,
 		)...,
 	)
-	services = append(services, metrics(deps.metrics))
+	// Register other internal services
+	services = append(services,
+		profile,
+		metrics(deps.metrics),
+	)
 
 	middlewares := []middleware.Middleware{
 		middleware.Cors(cfg.Webserver.CORSDomains),
@@ -67,6 +72,8 @@ func Run(components []Component, cfg *config.Config) (err error) {
 		webserver.Services(services...),
 		webserver.TLSConfig(tlsConfig),
 		webserver.Middlewares(middlewares...),
+		webserver.ReadTimeout(cfg.Webserver.ReadTimeout),
+		webserver.WriteTimeout(cfg.Webserver.WriteTimeout),
 	)
 	if err != nil {
 		return fmt.Errorf("unable to create the server: %w", err)
@@ -104,4 +111,11 @@ func metrics(reg *prometheus.Registry) func() (string, http.Handler) {
 			EnableOpenMetrics: true,
 		})
 	}
+}
+
+func profile() (string, http.Handler) {
+	// Get the default mux as pprof registers correctly with it
+	mux := http.DefaultServeMux
+
+	return "/debug/pprof/", mux
 }
