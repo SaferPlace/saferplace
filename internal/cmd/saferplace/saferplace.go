@@ -6,6 +6,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 
+	"connectrpc.com/connect"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/saferplace/webserver-go"
@@ -14,10 +15,8 @@ import (
 	"golang.org/x/sync/errgroup"
 	"safer.place/internal/auth"
 	"safer.place/internal/config"
+	"safer.place/internal/service"
 )
-
-// Service is webserver registered function to create a new service, aliased for convenience
-type Service = webserver.Service
 
 func Run(components []Component, cfg *config.Config) (err error) {
 	// Setup all deps
@@ -28,6 +27,14 @@ func Run(components []Component, cfg *config.Config) (err error) {
 	defer func() { _ = deps.logger.Sync() }()
 
 	eg, ctx := errgroup.WithContext(context.Background())
+
+	// shared middleware
+	middlewares := []middleware.Middleware{
+		middleware.Cors(cfg.Webserver.CORSDomains),
+	}
+
+	// shared interceptors
+	interceptors := []connect.Interceptor{}
 
 	if err := createHeadlessComponents(ctx, cfg, components, deps, eg); err != nil {
 		return fmt.Errorf("unable to create headless components: %w", err)
@@ -45,22 +52,26 @@ func Run(components []Component, cfg *config.Config) (err error) {
 
 	// Setup Webserver based on the provided services
 	userAuthMiddleware := auth.NewUserAuthMiddleware()
-	services := append(
-		reviewerServices,
-		ServiceMiddleware(
+
+	// creates services with the internal services
+	services := []webserver.Service{
+		profile,
+		metrics(deps.metrics),
+	}
+	services = append(services,
+		FinalizeServices(
+			nil,
+			interceptors,
+			reviewerServices,
+		)...,
+	)
+	services = append(services,
+		FinalizeServices(
 			[]middleware.Middleware{userAuthMiddleware},
+			interceptors,
 			userServices,
 		)...,
 	)
-	// Register other internal services
-	services = append(services,
-		profile,
-		metrics(deps.metrics),
-	)
-
-	middlewares := []middleware.Middleware{
-		middleware.Cors(cfg.Webserver.CORSDomains),
-	}
 
 	tlsConfig, err := newTLSConfig(cfg.Webserver.Cert)
 	if err != nil {
@@ -86,14 +97,16 @@ func Run(components []Component, cfg *config.Config) (err error) {
 	return eg.Wait()
 }
 
-// ServiceMiddleware wraps all provided services with the middleware.
-func ServiceMiddleware(
-	middlewares []middleware.Middleware, services []webserver.Service,
+// FinalizeServices wraps all provided services with the middleware.
+func FinalizeServices(
+	middlewares []middleware.Middleware,
+	interceptors []connect.Interceptor,
+	services []service.Service,
 ) []webserver.Service {
 	wrapped := make([]webserver.Service, 0, len(services))
 
 	for _, service := range services {
-		path, handler := service()
+		path, handler := service(interceptors...)
 		for _, middleware := range middlewares {
 			handler = middleware(handler)
 		}

@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"connectrpc.com/connect"
 	"go.uber.org/zap"
+	"safer.place/internal/service"
 	"safer.place/internal/storage"
 )
 
@@ -18,8 +20,9 @@ type Service struct {
 }
 
 // Register registers the image upload service.
-func Register(log *zap.Logger, store storage.Storage) func() (string, http.Handler) {
-	return func() (string, http.Handler) {
+func Register(log *zap.Logger, store storage.Storage) service.Service {
+	// We can ignore the interceptors as this is a non-connect service
+	return func(_ ...connect.Interceptor) (string, http.Handler) {
 		return "/v1/upload", &Service{
 			log:     log,
 			storage: store,

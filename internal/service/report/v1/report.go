@@ -13,6 +13,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"safer.place/internal/queue"
+	"safer.place/internal/service"
 
 	ipb "api.safer.place/incident/v1"
 	pb "api.safer.place/report/v1"
@@ -28,16 +29,19 @@ type Service struct {
 }
 
 // Register creates a new service and and returns the
-func Register(q queue.Producer[*ipb.Incident], log *zap.Logger) func() (string, http.Handler) {
-	return func() (string, http.Handler) {
-		return connectpb.NewReportServiceHandler(&Service{
-			queue: q,
-			log:   log,
-			validator: NewMultiValidator(
-				validateDescription,
-				validateCoordinates,
-			),
-		})
+func Register(q queue.Producer[*ipb.Incident], log *zap.Logger) service.Service {
+	return func(interceptors ...connect.Interceptor) (string, http.Handler) {
+		return connectpb.NewReportServiceHandler(
+			&Service{
+				queue: q,
+				log:   log,
+				validator: NewMultiValidator(
+					validateDescription,
+					validateCoordinates,
+				),
+			},
+			connect.WithInterceptors(interceptors...),
+		)
 	}
 }
 

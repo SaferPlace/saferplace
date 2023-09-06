@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/saferplace/webserver-go"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 	"golang.org/x/sync/errgroup"
 	"safer.place/internal/config"
 	"safer.place/internal/review"
+	"safer.place/internal/service"
 
 	// Registered services
 	"safer.place/internal/service/imageupload"
@@ -112,10 +112,10 @@ func createHeadlessComponents(ctx context.Context, cfg *config.Config, wantedCom
 	return nil
 }
 
-type registerComponentFn func(context.Context, *config.Config, *dependencies) (Service, error)
+type registerComponentFn func(context.Context, *config.Config, *dependencies) (service.Service, error)
 
-func createServices(ctx context.Context, cfg *config.Config, wantedComponents []Component, deps *dependencies, m ComponentRegisterMap) ([]Service, error) {
-	services := make([]webserver.Service, 0, len(wantedComponents))
+func createServices(ctx context.Context, cfg *config.Config, wantedComponents []Component, deps *dependencies, m ComponentRegisterMap) ([]service.Service, error) {
+	services := make([]service.Service, 0, len(wantedComponents))
 	for component, fn := range m {
 		if slices.Contains(wantedComponents, component) {
 			service, err := fn(ctx, cfg, deps)
@@ -143,28 +143,28 @@ func registerConsumer(ctx context.Context, cfg *config.Config, deps *dependencie
 	return nil
 }
 
-func registerReview(_ context.Context, _ *config.Config, deps *dependencies) (Service, error) {
+func registerReview(_ context.Context, _ *config.Config, deps *dependencies) (service.Service, error) {
 	return reviewv1.Register(
 		deps.database,
 		deps.logger.With(zap.String("service", "reviewv1")),
 	), nil
 }
 
-func registerReport(_ context.Context, _ *config.Config, deps *dependencies) (Service, error) {
+func registerReport(_ context.Context, _ *config.Config, deps *dependencies) (service.Service, error) {
 	return reportv1.Register(
 		deps.queue,
 		deps.logger.With(zap.String("service", "reportv1")),
 	), nil
 }
 
-func registerUploader(_ context.Context, _ *config.Config, deps *dependencies) (Service, error) {
+func registerUploader(_ context.Context, _ *config.Config, deps *dependencies) (service.Service, error) {
 	return imageupload.Register(
 		deps.logger.With(zap.String("service", "imageupload")),
 		deps.storage,
 	), nil
 }
 
-func registerViewer(_ context.Context, _ *config.Config, deps *dependencies) (Service, error) {
+func registerViewer(_ context.Context, _ *config.Config, deps *dependencies) (service.Service, error) {
 	return viewerv1.Register(
 		deps.database,
 		deps.logger.With(zap.String("service", "viewerv1")),

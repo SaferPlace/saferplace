@@ -14,6 +14,7 @@ import (
 	"connectrpc.com/connect"
 	"go.uber.org/zap"
 	"safer.place/internal/database"
+	"safer.place/internal/service"
 )
 
 const (
@@ -32,12 +33,15 @@ type Service struct {
 func Register(
 	db database.Database,
 	log *zap.Logger,
-) func() (string, http.Handler) {
-	return func() (string, http.Handler) {
-		return viewerconnect.NewViewerServiceHandler(&Service{
-			db:  db,
-			log: log,
-		})
+) service.Service {
+	return func(interceptors ...connect.Interceptor) (string, http.Handler) {
+		return viewerconnect.NewViewerServiceHandler(
+			&Service{
+				db:  db,
+				log: log,
+			},
+			connect.WithInterceptors(interceptors...),
+		)
 	}
 }
 
