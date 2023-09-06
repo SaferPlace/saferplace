@@ -31,6 +31,9 @@ type WebserverConfig struct {
 	CORSDomains []string   `yaml:"cors_domains" default:""`
 	Cert        CertConfig `yaml:"cert"`
 	Auth        AuthConfig `yaml:"auth"`
+
+	WriteTimeout time.Duration `yaml:"write_timeout" default:"30s"`
+	ReadTimeout  time.Duration `yaml:"read_timeout" default:"30s"`
 }
 
 // QueueConfig provides the configuration to consume and produce from the queue
