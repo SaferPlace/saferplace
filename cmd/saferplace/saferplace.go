@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"strings"
@@ -30,5 +31,5 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	return saferplace.Run(components, cfg)
+	return saferplace.Run(context.Background(), components, cfg)
 }

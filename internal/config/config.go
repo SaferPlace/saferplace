@@ -10,6 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 	"safer.place/internal/database/sqldatabase"
 	"safer.place/internal/storage/minio"
+	"safer.place/internal/tracing"
 )
 
 // Config containing all configuration for saferplace.
@@ -19,6 +20,7 @@ type Config struct {
 	Debug bool `yaml:"debug"`
 
 	Webserver WebserverConfig `yaml:"webserver"`
+	Tracing   *tracing.Config `yaml:"tracing"`
 	Queue     QueueConfig     `yaml:"queue"`
 	Database  DatabaseConfig  `yaml:"database"`
 	Storage   StorageConfig   `yaml:"storage"`

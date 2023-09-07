@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"io"
 	"slices"
 	"time"
 
@@ -14,6 +15,8 @@ import (
 	"github.com/saferplace/webserver-go/certificate"
 	"github.com/saferplace/webserver-go/certificate/insecure"
 	"github.com/saferplace/webserver-go/certificate/temporary"
+
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"safer.place/internal/config"
 	"safer.place/internal/database"
@@ -24,6 +27,7 @@ import (
 	"safer.place/internal/queue/memory"
 	"safer.place/internal/storage"
 	"safer.place/internal/storage/minio"
+	"safer.place/internal/tracing"
 )
 
 var errProviderNotFound = errors.New("provider not found")
@@ -66,8 +70,12 @@ func StringsToDependencies(ss []string) []Dependency {
 }
 
 type dependencies struct {
-	metrics  *prometheus.Registry
-	logger   *zap.Logger
+	// always created dependencies
+	tracing trace.TracerProvider
+	metrics *prometheus.Registry
+	logger  *zap.Logger
+
+	// dynamically created dependencies
 	database database.Database
 	queue    queue.Queue[*incident.Incident]
 	storage  storage.Storage
@@ -76,13 +84,22 @@ type dependencies struct {
 
 type registerDependencyFn func(*config.Config, *dependencies) error
 
-func createDependencies(cfg *config.Config, components []Component) (*dependencies, error) {
+func createDependencies(ctx context.Context, cfg *config.Config, components []Component) (*dependencies, io.Closer, error) {
 	wantedDependencies := neededDependencies(components)
 
 	deps := &dependencies{
 		logger:  newLogger(cfg),
 		metrics: prometheus.NewRegistry(),
 	}
+
+	mc := multiCloser{closer(func() error { return deps.logger.Sync() })}
+
+	tracing, tracingCloser, err := tracing.NewTracingProvider(ctx, cfg.Tracing)
+	if err != nil {
+		return nil, mc, fmt.Errorf("unable to create tracing provider: %w", err)
+	}
+	mc = append(mc, tracingCloser)
+	deps.tracing = tracing
 
 	deps.logger.Debug("initializing dependencies",
 		zap.Strings("components", ComponentsToStrings(components)),
@@ -103,15 +120,15 @@ func createDependencies(cfg *config.Config, components []Component) (*dependenci
 	} {
 		if slices.Contains(wantedDependencies, dep) {
 			if err := fn(cfg, deps); err != nil {
-				return deps, err
+				return deps, mc, err
 			}
 		}
 	}
 
-	return deps, nil
+	return deps, mc, nil
 }
 
-func newTLSConfig(cfg config.CertConfig) (v *tls.Config, err error) {
+func newTLSConfig(ctx context.Context, cfg config.CertConfig) (v *tls.Config, err error) {
 	var p certificate.Provider
 	switch cfg.Provider {
 	case "temporary":
@@ -124,7 +141,7 @@ func newTLSConfig(cfg config.CertConfig) (v *tls.Config, err error) {
 		return nil, errProviderNotFound
 	}
 
-	v, err = p.Provide(context.Background(), cfg.Domains)
+	v, err = p.Provide(ctx, cfg.Domains)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create %q TLS config: %w", cfg.Provider, err)
 	}
@@ -215,4 +232,21 @@ func newLogger(cfg *config.Config) *zap.Logger {
 	)
 
 	return logger
+}
+
+type closer func() error
+
+func (c closer) Close() error {
+	return c()
+}
+
+type multiCloser []io.Closer
+
+func (mc multiCloser) Close() error {
+	var err error
+	for _, c := range mc {
+		err = errors.Join(err, c.Close())
+	}
+
+	return err
 }
