@@ -159,8 +159,9 @@ func registerReport(_ context.Context, _ *config.Config, deps *dependencies) (se
 
 func registerUploader(_ context.Context, _ *config.Config, deps *dependencies) (service.Service, error) {
 	return imageupload.Register(
-		deps.logger.With(zap.String("service", "imageupload")),
-		deps.storage,
+		imageupload.Logger(deps.logger.With(zap.String("service", "imageupload"))),
+		imageupload.Tracer(deps.tracing.Tracer("imageupload")),
+		imageupload.Storage(deps.storage),
 	), nil
 }
 

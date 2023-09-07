@@ -16,6 +16,7 @@ import (
 	"github.com/saferplace/webserver-go/certificate/insecure"
 	"github.com/saferplace/webserver-go/certificate/temporary"
 
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"safer.place/internal/config"
@@ -82,7 +83,7 @@ type dependencies struct {
 	notifer  notifier.Notifier
 }
 
-type registerDependencyFn func(*config.Config, *dependencies) error
+type registerDependencyFn func(context.Context, *config.Config, *dependencies) error
 
 func createDependencies(ctx context.Context, cfg *config.Config, components []Component) (*dependencies, io.Closer, error) {
 	wantedDependencies := neededDependencies(components)
@@ -119,7 +120,7 @@ func createDependencies(ctx context.Context, cfg *config.Config, components []Co
 		NotifierDependency: registerNotifier,
 	} {
 		if slices.Contains(wantedDependencies, dep) {
-			if err := fn(cfg, deps); err != nil {
+			if err := fn(ctx, cfg, deps); err != nil {
 				return deps, mc, err
 			}
 		}
@@ -149,7 +150,7 @@ func newTLSConfig(ctx context.Context, cfg config.CertConfig) (v *tls.Config, er
 	return v, nil
 }
 
-func registerDatabase(cfg *config.Config, deps *dependencies) (err error) {
+func registerDatabase(_ context.Context, cfg *config.Config, deps *dependencies) (err error) {
 	var v database.Database
 	switch cfg.Database.Provider {
 	case "sql":
@@ -166,7 +167,7 @@ func registerDatabase(cfg *config.Config, deps *dependencies) (err error) {
 	return nil
 }
 
-func registerQueue(cfg *config.Config, deps *dependencies) (err error) {
+func registerQueue(_ context.Context, cfg *config.Config, deps *dependencies) (err error) {
 	var v queue.Queue[*incident.Incident]
 	switch cfg.Queue.Provider {
 	case "memory":
@@ -183,11 +184,20 @@ func registerQueue(cfg *config.Config, deps *dependencies) (err error) {
 	return nil
 }
 
-func registerStorage(cfg *config.Config, deps *dependencies) (err error) {
+func registerStorage(ctx context.Context, cfg *config.Config, deps *dependencies) (err error) {
 	var v storage.Storage
 	switch cfg.Storage.Provider {
 	case "minio":
-		v, err = minio.New(cfg.Storage.Minio)
+		v, err = minio.New(ctx,
+			cfg.Storage.Minio,
+			minio.Tracer(
+				deps.tracing.Tracer("storage",
+					trace.WithInstrumentationAttributes(
+						attribute.String("provider", "minio"),
+					),
+				),
+			),
+		)
 	default:
 		err = errProviderNotFound
 	}
@@ -200,7 +210,7 @@ func registerStorage(cfg *config.Config, deps *dependencies) (err error) {
 	return nil
 }
 
-func registerNotifier(cfg *config.Config, deps *dependencies) (err error) {
+func registerNotifier(_ context.Context, cfg *config.Config, deps *dependencies) (err error) {
 	var v notifier.Notifier
 	log := deps.logger.With(zap.String("notifier", cfg.Notifier.Provider))
 	switch cfg.Notifier.Provider {

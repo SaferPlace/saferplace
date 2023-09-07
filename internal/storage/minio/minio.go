@@ -5,12 +5,15 @@ package minio
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type Config struct {
@@ -24,10 +27,19 @@ type Config struct {
 type Storage struct {
 	client *minio.Client
 	bucket string
+	tracer trace.Tracer
 }
 
-func New(cfg *Config) (*Storage, error) {
-	c, err := minio.New(cfg.Endpoint, &minio.Options{
+func New(ctx context.Context, cfg *Config, opts ...Option) (*Storage, error) {
+	var err error
+
+	s := &Storage{bucket: cfg.Bucket}
+
+	for _, opt := range opts {
+		opt(s)
+	}
+
+	s.client, err = minio.New(cfg.Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(cfg.AccessKey, string(cfg.SecretKey), ""),
 		Secure: cfg.Secure,
 	})
@@ -35,34 +47,58 @@ func New(cfg *Config) (*Storage, error) {
 		return nil, fmt.Errorf("unable to create minio client: %w", err)
 	}
 
-	ctx := context.Background()
 	// Create the bucket if it doesn't exist
-	exists, err := c.BucketExists(ctx, cfg.Bucket)
+	exists, err := s.client.BucketExists(ctx, cfg.Bucket)
 	if err != nil {
 		return nil, fmt.Errorf("unable to check does the bucket exist: %w", err)
 	}
 	if !exists {
-		if err := c.MakeBucket(ctx, cfg.Bucket, minio.MakeBucketOptions{}); err != nil {
+		if err := s.client.MakeBucket(ctx, cfg.Bucket, minio.MakeBucketOptions{}); err != nil {
 			return nil, fmt.Errorf("unable to create bucket: %w", err)
 		}
 	}
 
-	return &Storage{
-		client: c,
-		bucket: cfg.Bucket,
-	}, nil
+	if err := validate(s); err != nil {
+		return nil, fmt.Errorf("minio validation failed: %w", err)
+	}
+
+	return s, nil
 }
 
 // Upload image to the minio bucket
 func (s *Storage) Upload(ctx context.Context, r io.Reader, size int64, contentType string) (string, error) {
+	ctx, span := s.tracer.Start(ctx, "upload")
+	defer span.End()
+
 	id := uuid.New().String()
 	if _, err := s.client.PutObject(
 		ctx, s.bucket, id, r, size, minio.PutObjectOptions{
 			ContentType: contentType,
 		},
 	); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return "", fmt.Errorf("unable to upload image: %w", err)
 	}
 
 	return id, nil
+}
+
+var (
+	errMissingClient = errors.New("missing client")
+	errMissingBucket = errors.New("missing bucket")
+	errMissingTracer = errors.New("missing tracer")
+)
+
+func validate(s *Storage) error {
+	if s.bucket == "" {
+		return errMissingBucket
+	}
+	if s.client == nil {
+		return errMissingClient
+	}
+	if s.tracer == nil {
+		return errMissingTracer
+	}
+	return nil
 }
