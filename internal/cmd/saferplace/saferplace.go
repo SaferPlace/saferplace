@@ -7,6 +7,7 @@ import (
 	_ "net/http/pprof"
 
 	"connectrpc.com/connect"
+	"connectrpc.com/otelconnect"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/saferplace/webserver-go"
@@ -18,15 +19,15 @@ import (
 	"safer.place/internal/service"
 )
 
-func Run(components []Component, cfg *config.Config) (err error) {
+func Run(ctx context.Context, components []Component, cfg *config.Config) (err error) {
+	eg, ctx := errgroup.WithContext(ctx)
+
 	// Setup all deps
-	deps, err := createDependencies(cfg, components)
+	deps, depCloser, err := createDependencies(ctx, cfg, components)
 	if err != nil {
 		return
 	}
-	defer func() { _ = deps.logger.Sync() }()
-
-	eg, ctx := errgroup.WithContext(context.Background())
+	defer depCloser.Close()
 
 	// shared middleware
 	middlewares := []middleware.Middleware{
@@ -34,7 +35,11 @@ func Run(components []Component, cfg *config.Config) (err error) {
 	}
 
 	// shared interceptors
-	interceptors := []connect.Interceptor{}
+	interceptors := []connect.Interceptor{
+		otelconnect.NewInterceptor(
+			otelconnect.WithTracerProvider(deps.tracing),
+		),
+	}
 
 	if err := createHeadlessComponents(ctx, cfg, components, deps, eg); err != nil {
 		return fmt.Errorf("unable to create headless components: %w", err)
@@ -73,7 +78,7 @@ func Run(components []Component, cfg *config.Config) (err error) {
 		)...,
 	)
 
-	tlsConfig, err := newTLSConfig(cfg.Webserver.Cert)
+	tlsConfig, err := newTLSConfig(ctx, cfg.Webserver.Cert)
 	if err != nil {
 		return err
 	}
