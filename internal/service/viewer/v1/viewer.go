@@ -6,14 +6,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
+	"connectrpc.com/connect"
+
 	"api.safer.place/viewer/v1"
 	"api.safer.place/viewer/v1/viewerconnect"
-	"connectrpc.com/connect"
-	"go.uber.org/zap"
 	"safer.place/internal/database"
+	"safer.place/internal/log"
 	"safer.place/internal/service"
 )
 
@@ -26,13 +28,13 @@ const (
 // Service is the viewer service
 type Service struct {
 	db  database.Database
-	log *zap.Logger
+	log log.Logger
 }
 
 // Register the viewer service
 func Register(
 	db database.Database,
-	log *zap.Logger,
+	log log.Logger,
 ) service.Service {
 	return func(interceptors ...connect.Interceptor) (string, http.Handler) {
 		return viewerconnect.NewViewerServiceHandler(
@@ -54,8 +56,8 @@ func (s *Service) ViewInRadius(
 	*connect.Response[viewer.ViewInRadiusResponse],
 	error,
 ) {
-	s.log.Info("getting incidents in radius",
-		zap.Float64("radius", req.Msg.Radius),
+	s.log.Info(ctx, "getting incidents in radius",
+		slog.Float64("radius", req.Msg.Radius),
 		// Lattitude and Longitude logs omitted on purpose to avoid
 		// PII (location data) in logs.
 	)
@@ -98,9 +100,9 @@ func (s *Service) ViewInRegion(
 		since = time.Now().Add(-7 * 24 * time.Hour)
 	}
 
-	s.log.Info("viewing incidents in region",
-		zap.Any("region", req.Msg.Region),
-		zap.String("since", since.String()),
+	s.log.Info(ctx, "viewing incidents in region",
+		slog.Any("region", req.Msg.Region),
+		slog.Time("since", since),
 	)
 
 	inc, err := s.db.IncidentsInRegion(ctx, since, req.Msg.Region)
@@ -121,8 +123,8 @@ func (s *Service) ViewIncident(
 	*connect.Response[viewer.ViewIncidentResponse],
 	error,
 ) {
-	s.log.Info("view incident",
-		zap.String("id", req.Msg.Id),
+	s.log.Info(ctx, "view incident",
+		slog.String("id", req.Msg.Id),
 	)
 
 	inc, err := s.db.ViewIncident(ctx, req.Msg.Id)
@@ -161,9 +163,9 @@ func (s *Service) ViewAlerting(
 		since = time.Now().Add(-7 * 24 * time.Hour)
 	}
 
-	s.log.Info("viewing alerting incidents",
-		zap.Any("region", req.Msg.Region),
-		zap.String("since", since.String()),
+	s.log.Info(ctx, "viewing alerting incidents",
+		slog.Any("region", req.Msg.Region),
+		slog.Time("since", since),
 	)
 
 	inc, err := s.db.AlertingIncidents(ctx, since, req.Msg.Region)

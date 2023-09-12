@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
+	"os"
 	"slices"
 	"time"
 
@@ -15,13 +17,13 @@ import (
 	"github.com/saferplace/webserver-go/certificate"
 	"github.com/saferplace/webserver-go/certificate/insecure"
 	"github.com/saferplace/webserver-go/certificate/temporary"
-
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"go.uber.org/zap"
+
 	"safer.place/internal/config"
 	"safer.place/internal/database"
 	"safer.place/internal/database/sqldatabase"
+	"safer.place/internal/log"
 	"safer.place/internal/notifier"
 	"safer.place/internal/notifier/lognotifier"
 	"safer.place/internal/queue"
@@ -41,14 +43,6 @@ const (
 	StorageDependency  Dependency = "storage"
 	NotifierDependency Dependency = "notifier"
 )
-
-func dependenciesToStrings(dependencies []Dependency) []string {
-	res := make([]string, 0, len(dependencies))
-	for _, dependency := range dependencies {
-		res = append(res, string(dependency))
-	}
-	return res
-}
 
 // StringsToDependencies converts a string slice into dependecy slice
 func StringsToDependencies(ss []string) []Dependency {
@@ -74,7 +68,7 @@ type dependencies struct {
 	// always created dependencies
 	tracing trace.TracerProvider
 	metrics *prometheus.Registry
-	logger  *zap.Logger
+	logger  log.Logger
 
 	// dynamically created dependencies
 	database database.Database
@@ -93,7 +87,7 @@ func createDependencies(ctx context.Context, cfg *config.Config, components []Co
 		metrics: prometheus.NewRegistry(),
 	}
 
-	mc := multiCloser{closer(func() error { return deps.logger.Sync() })}
+	mc := multiCloser{}
 
 	tracing, tracingCloser, err := tracing.NewTracingProvider(ctx, cfg.Tracing)
 	if err != nil {
@@ -102,9 +96,9 @@ func createDependencies(ctx context.Context, cfg *config.Config, components []Co
 	mc = append(mc, tracingCloser)
 	deps.tracing = tracing
 
-	deps.logger.Debug("initializing dependencies",
-		zap.Strings("components", ComponentsToStrings(components)),
-		zap.Strings("dependencies", dependenciesToStrings(wantedDependencies)),
+	deps.logger.Debug(ctx, "initializing dependencies",
+		slog.Any("components", components),
+		slog.Any("dependencies", wantedDependencies),
 	)
 
 	deps.metrics.MustRegister(
@@ -212,7 +206,7 @@ func registerStorage(ctx context.Context, cfg *config.Config, deps *dependencies
 
 func registerNotifier(_ context.Context, cfg *config.Config, deps *dependencies) (err error) {
 	var v notifier.Notifier
-	log := deps.logger.With(zap.String("notifier", cfg.Notifier.Provider))
+	log := deps.logger.With(slog.String("notifier", cfg.Notifier.Provider))
 	switch cfg.Notifier.Provider {
 	case "log":
 		v = lognotifier.New(log)
@@ -228,26 +222,24 @@ func registerNotifier(_ context.Context, cfg *config.Config, deps *dependencies)
 	return nil
 }
 
-func newLogger(cfg *config.Config) *zap.Logger {
-	var logger *zap.Logger
+func newLogger(cfg *config.Config) log.Logger {
+	var logger log.Logger
 	if cfg.Debug {
-		logger, _ = zap.NewDevelopment()
-		logger.Debug("debug mode enabled")
+		// logger = log.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		// 	Level: slog.LevelDebug,
+		// }))
+		logger = log.New(log.NewHandler(os.Stdout, slog.LevelDebug))
 	} else {
-		logger, _ = zap.NewProduction()
+		logger = log.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+			Level: slog.LevelInfo,
+		}))
 	}
 
-	logger.Debug("using configuration",
-		zap.Any("config", cfg),
+	logger.Debug(context.Background(), "using configuration",
+		slog.Any("config", cfg),
 	)
 
 	return logger
-}
-
-type closer func() error
-
-func (c closer) Close() error {
-	return c()
 }
 
 type multiCloser []io.Closer

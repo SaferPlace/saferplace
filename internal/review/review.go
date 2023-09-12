@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"api.safer.place/incident/v1"
-	"go.uber.org/zap"
+
 	"safer.place/internal/database"
+	"safer.place/internal/log"
 	"safer.place/internal/notifier"
 	"safer.place/internal/queue"
 )
@@ -18,12 +20,12 @@ type Review struct {
 	reviewNotifier notifier.Notifier
 	db             database.Database
 
-	log *zap.Logger
+	log log.Logger
 }
 
 // New review handler
 func New(
-	log *zap.Logger,
+	log log.Logger,
 	incoming queue.Consumer[*incident.Incident],
 	db database.Database,
 	reviewNotifier notifier.Notifier,
@@ -38,10 +40,12 @@ func New(
 
 // Run the review process
 func (r *Review) Run(ctx context.Context) error {
-	r.log.Info("listening for incoming reviews")
+	r.log.Info(ctx, "listening for incoming reviews")
 	for {
 		if err := r.handleIncoming(ctx); err != nil {
-			r.log.Error("incident handling failed", zap.Error(err))
+			r.log.Error(ctx, "incident handling failed",
+				log.Error(err),
+			)
 			// TODO: For debugging. We typically don't actually want to shut
 			//       down.
 			return err
@@ -56,11 +60,13 @@ func (r *Review) handleIncoming(ctx context.Context) (err error) {
 	}
 	defer func() {
 		if err != nil {
-			r.log.Debug("nacking incident", zap.Error(err))
+			r.log.Debug(ctx, "nacking incident",
+				log.Error(err),
+			)
 			msg.Nack()
 			return
 		}
-		r.log.Debug("acking incident")
+		r.log.Debug(ctx, "acking incident")
 		msg.Ack()
 	}()
 
@@ -70,7 +76,9 @@ func (r *Review) handleIncoming(ctx context.Context) (err error) {
 	// went wrong and it got requeued.
 	if err := r.db.SaveIncident(ctx, inc); err != nil {
 		if errors.Is(err, database.ErrAlreadyExists) {
-			r.log.Info("incident already exists", zap.String("id", inc.Id))
+			r.log.Info(ctx, "incident already exists",
+				slog.String("id", inc.Id),
+			)
 			return nil
 		}
 		return fmt.Errorf("unable to save incident: %w", err)

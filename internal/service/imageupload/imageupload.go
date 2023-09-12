@@ -11,7 +11,8 @@ import (
 	"connectrpc.com/connect"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
-	"go.uber.org/zap"
+
+	"safer.place/internal/log"
 	"safer.place/internal/service"
 	"safer.place/internal/storage"
 )
@@ -20,7 +21,7 @@ import (
 type Service struct {
 	tracer  trace.Tracer
 	storage storage.Storage
-	log     *zap.Logger
+	log     log.Logger
 }
 
 // Register registers the image upload service.
@@ -46,7 +47,9 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx, span := s.tracer.Start(r.Context(), "upload")
 	defer span.End()
 	if err := r.ParseForm(); err != nil {
-		s.log.Error("unable to parse form data", zap.Error(err))
+		s.log.Error(ctx, "unable to parse form data",
+			log.Error(err),
+		)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		http.Error(w, "unable to parse form", http.StatusBadRequest)
@@ -54,7 +57,9 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	file, header, err := r.FormFile("image")
 	if err != nil {
-		s.log.Error("unable to get image from user", zap.Error(err))
+		s.log.Error(ctx, "unable to get image from user",
+			log.Error(err),
+		)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		http.Error(w, "image upload failed", http.StatusBadRequest)
@@ -65,7 +70,9 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	reference, err := s.storage.Upload(
 		ctx, file, header.Size, header.Header.Get("Content-Type"))
 	if err != nil {
-		s.log.Error("image upload failed", zap.Error(err))
+		s.log.Error(ctx, "image upload failed",
+			log.Error(err),
+		)
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		http.Error(w, "image upload failed", http.StatusInternalServerError)
