@@ -42,7 +42,7 @@ This will ensure that you need authentication to write to the bucket, but not to
 
 #### Go Backend
 
-The Go Backend can be ran as individual components, or as a single binary. For development its easiest to run it as a monolithic binary. By default it will run on `http://localhost:8001`
+The Go Backend can be ran as individual components, or as a single binary. For development its easiest to run it as a monolithic binary. By default, it will be running on `http://localhost:8001`
 
 ```sh
 # ~/workdir/saferplace
