@@ -14,14 +14,15 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
+	"safer.place/internal/config/secret"
 )
 
 type Config struct {
-	Endpoint  string `yaml:"endpoint" default:"minio.svc"`
-	Bucket    string `yaml:"bucket" default:"images"`
-	AccessKey string `yaml:"access_key" split_words:"true"`
-	SecretKey string `yaml:"secret_key" split_words:"true"`
-	Secure    bool   `yaml:"secure" default:"false"`
+	Endpoint  string        `yaml:"endpoint" default:"minio.svc"`
+	Bucket    string        `yaml:"bucket" default:"images"`
+	AccessKey string        `yaml:"access_key" split_words:"true"`
+	SecretKey secret.Secret `yaml:"secret_key" split_words:"true"`
+	Secure    bool          `yaml:"secure" default:"false"`
 }
 
 type Storage struct {

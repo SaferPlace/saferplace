@@ -2,7 +2,8 @@ package imageupload
 
 import (
 	"go.opentelemetry.io/otel/trace"
-	"go.uber.org/zap"
+
+	"safer.place/internal/log"
 	"safer.place/internal/storage"
 )
 
@@ -10,7 +11,7 @@ import (
 type Option func(*Service)
 
 // Logger provides the logger
-func Logger(log *zap.Logger) Option {
+func Logger(log log.Logger) Option {
 	return func(s *Service) {
 		s.log = log
 	}

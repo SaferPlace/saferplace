@@ -3,9 +3,9 @@ package saferplace
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"slices"
 
-	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 	"golang.org/x/sync/errgroup"
 	"safer.place/internal/config"
@@ -130,7 +130,7 @@ func createServices(ctx context.Context, cfg *config.Config, wantedComponents []
 
 func registerConsumer(ctx context.Context, cfg *config.Config, deps *dependencies, eg *errgroup.Group) error {
 	consumer := review.New(
-		deps.logger.With(zap.String("component", "review")),
+		deps.logger.With(slog.String("component", "review")),
 		deps.queue,
 		deps.database,
 		deps.notifer,
@@ -146,20 +146,20 @@ func registerConsumer(ctx context.Context, cfg *config.Config, deps *dependencie
 func registerReview(_ context.Context, _ *config.Config, deps *dependencies) (service.Service, error) {
 	return reviewv1.Register(
 		deps.database,
-		deps.logger.With(zap.String("service", "reviewv1")),
+		deps.logger.With(slog.String("service", "reviewv1")),
 	), nil
 }
 
 func registerReport(_ context.Context, _ *config.Config, deps *dependencies) (service.Service, error) {
 	return reportv1.Register(
 		deps.queue,
-		deps.logger.With(zap.String("service", "reportv1")),
+		deps.logger.With(slog.String("service", "reportv1")),
 	), nil
 }
 
 func registerUploader(_ context.Context, _ *config.Config, deps *dependencies) (service.Service, error) {
 	return imageupload.Register(
-		imageupload.Logger(deps.logger.With(zap.String("service", "imageupload"))),
+		imageupload.Logger(deps.logger.With(slog.String("service", "imageupload"))),
 		imageupload.Tracer(deps.tracing.Tracer("imageupload")),
 		imageupload.Storage(deps.storage),
 	), nil
@@ -168,6 +168,6 @@ func registerUploader(_ context.Context, _ *config.Config, deps *dependencies) (
 func registerViewer(_ context.Context, _ *config.Config, deps *dependencies) (service.Service, error) {
 	return viewerv1.Register(
 		deps.database,
-		deps.logger.With(zap.String("service", "viewerv1")),
+		deps.logger.With(slog.String("service", "viewerv1")),
 	), nil
 }

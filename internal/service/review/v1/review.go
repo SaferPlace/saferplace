@@ -5,29 +5,30 @@ package review
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/http"
 	"time"
 
 	"connectrpc.com/connect"
-	"go.uber.org/zap"
-	"safer.place/internal/database"
-	"safer.place/internal/service"
 
 	"api.safer.place/incident/v1"
 	pb "api.safer.place/review/v1"
 	connectpb "api.safer.place/review/v1/reviewconnect"
+	"safer.place/internal/database"
+	"safer.place/internal/log"
+	"safer.place/internal/service"
 )
 
 // Service is the review service
 type Service struct {
 	db  database.Database
-	log *zap.Logger
+	log log.Logger
 }
 
 // Register the review service
 func Register(
 	db database.Database,
-	log *zap.Logger,
+	log log.Logger,
 ) service.Service {
 	return func(interceptors ...connect.Interceptor) (string, http.Handler) {
 		return connectpb.NewReviewServiceHandler(&Service{
@@ -45,9 +46,9 @@ func (s *Service) ReviewIncident(
 	*connect.Response[pb.ReviewIncidentResponse],
 	error,
 ) {
-	s.log.Info("review received",
-		zap.String("id", req.Msg.Id),
-		zap.String("resolution", req.Msg.Resolution.String()),
+	s.log.Info(ctx, "review received",
+		slog.String("id", req.Msg.Id),
+		slog.String("resolution", req.Msg.Resolution.String()),
 	)
 
 	comment := &incident.Comment{
@@ -77,8 +78,8 @@ func (s *Service) ViewIncident(
 	*connect.Response[pb.ViewIncidentResponse],
 	error,
 ) {
-	s.log.Info("view incident",
-		zap.String("id", req.Msg.Id),
+	s.log.Info(ctx, "view incident",
+		slog.String("id", req.Msg.Id),
 	)
 
 	inc, err := s.db.ViewIncident(ctx, req.Msg.Id)

@@ -5,31 +5,31 @@ package report
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"connectrpc.com/connect"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
-
-	"safer.place/internal/queue"
-	"safer.place/internal/service"
 
 	ipb "api.safer.place/incident/v1"
 	pb "api.safer.place/report/v1"
 	connectpb "api.safer.place/report/v1/reportconnect"
+	"safer.place/internal/log"
+	"safer.place/internal/queue"
+	"safer.place/internal/service"
 )
 
 // Service is the report service
 type Service struct {
 	queue queue.Producer[*ipb.Incident]
-	log   *zap.Logger
+	log   log.Logger
 
 	validator Validator
 }
 
 // Register creates a new service and and returns the
-func Register(q queue.Producer[*ipb.Incident], log *zap.Logger) service.Service {
+func Register(q queue.Producer[*ipb.Incident], log log.Logger) service.Service {
 	return func(interceptors ...connect.Interceptor) (string, http.Handler) {
 		return connectpb.NewReportServiceHandler(
 			&Service{
@@ -62,8 +62,8 @@ func (s *Service) SendReport(
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
-	s.log.Info("received report",
-		zap.String("id", incident.Id),
+	s.log.Info(ctx, "received report",
+		slog.String("id", incident.Id),
 	)
 
 	if err := s.queue.Produce(ctx, incident); err != nil {

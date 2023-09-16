@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/bwmarrin/discordgo"
@@ -56,13 +55,14 @@ func (n *Notifier) Notify(ctx context.Context, i *incident.Incident) error {
 		return fmt.Errorf("unable to encode webhook body: %w", err)
 	}
 
-	log.Println(body)
-
-	req, err := http.NewRequest(http.MethodPost, n.endpoint, body)
+	req, err := http.NewRequestWithContext(ctx,
+		http.MethodPost,
+		n.endpoint,
+		body,
+	)
 	if err != nil {
 		return fmt.Errorf("unable to create request: %w", err)
 	}
-	req = req.WithContext(ctx)
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := n.client.Do(req)

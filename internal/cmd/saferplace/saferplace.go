@@ -12,7 +12,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/saferplace/webserver-go"
 	"github.com/saferplace/webserver-go/middleware"
-	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"safer.place/internal/auth"
 	"safer.place/internal/config"
@@ -84,7 +83,8 @@ func Run(ctx context.Context, components []Component, cfg *config.Config) (err e
 	}
 
 	srv, err := webserver.New(
-		webserver.Logger(deps.logger.With(zap.String("component", "server"))),
+		// TODO: Enable slog in webserver
+		// webserver.Logger(deps.logger.With(slog.String("component", "server"))),
 		webserver.Services(services...),
 		webserver.TLSConfig(tlsConfig),
 		webserver.Middlewares(middlewares...),

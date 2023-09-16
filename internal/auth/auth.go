@@ -4,15 +4,16 @@ package auth
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 
-	"go.uber.org/zap"
-
 	"safer.place/internal/database"
+	"safer.place/internal/log"
 )
 
 var (
@@ -27,7 +28,7 @@ type githubTokenResponse struct {
 // but if needed this can be expanded.
 type Config struct {
 	Handler      http.Handler
-	Log          *zap.Logger
+	Log          log.Logger
 	Domain       string
 	ClientID     string
 	ClientSecret string
@@ -41,7 +42,7 @@ type Auth struct {
 	mux         *http.ServeMux
 	cfg         *Config
 	client      *http.Client
-	log         *zap.Logger
+	log         log.Logger
 	db          database.Database
 }
 
@@ -68,9 +69,9 @@ func Register(prefix string, cfg *Config) func() (string, http.Handler) {
 	a.mux.HandleFunc("/oauth/callback", a.callback)
 	a.mux.HandleFunc("/", a.index)
 
-	cfg.Log.Info("authentication set up",
-		zap.String("prefix", prefix),
-		zap.String("callback", a.callbackURL),
+	cfg.Log.Info(context.Background(), "authentication set up",
+		slog.String("prefix", prefix),
+		slog.String("callback", a.callbackURL),
 	)
 
 	return func() (string, http.Handler) {
@@ -91,7 +92,8 @@ func (a *Auth) index(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Auth) callback(w http.ResponseWriter, r *http.Request) {
-	a.log.Info("callback")
+	ctx := r.Context()
+	a.log.Debug(ctx, "callback")
 	code := r.URL.Query().Get("code")
 
 	if code == "" {
@@ -105,8 +107,7 @@ func (a *Auth) callback(w http.ResponseWriter, r *http.Request) {
 		"code":          code,
 	})
 
-	req, err := http.NewRequestWithContext(
-		r.Context(),
+	req, err := http.NewRequestWithContext(ctx,
 		http.MethodPost,
 		"https://github.com/login/oauth/access_token",
 		bytes.NewBuffer(requestData),
@@ -118,7 +119,7 @@ func (a *Auth) callback(w http.ResponseWriter, r *http.Request) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
-	a.log.Info("sending the request to github to validate code")
+	a.log.Debug(ctx, "sending the request to github to validate code")
 
 	resp, err := a.client.Do(req)
 	if err != nil {
@@ -126,7 +127,7 @@ func (a *Auth) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.log.Info("request validated")
+	a.log.Debug(ctx, "request validated")
 
 	var tokenData githubTokenResponse
 	if err := json.NewDecoder(resp.Body).Decode(&tokenData); err != nil {
@@ -154,29 +155,35 @@ func (a *Auth) callback(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Auth) authenticated(r *http.Request) (bool, error) {
+	ctx := r.Context()
 	cookie, err := r.Cookie("Authorization")
 	if err != nil {
-		a.log.Info("cookie not found")
+		a.log.Debug(ctx, "cookie not found")
 		return false, nil
 	}
 
-	a.log.Info("checking if cookie", zap.Any("cookie", cookie))
+	a.log.Debug(ctx, "checking if cookie",
+		slog.Any("cookie", cookie),
+	)
 
 	bearerToken := strings.Split(cookie.Value, " ")
 	if len(bearerToken) != 2 {
-		a.log.Info("not in 2 parts")
+		a.log.Warn(ctx, "token is not composed of 2 parts")
 		return false, ErrBadFormat
 	}
 
 	if bearerToken[0] != "Bearer" {
-		a.log.Info("bad format")
+		a.log.Warn(ctx, "token does not contain Bearer")
 		return false, ErrBadFormat
 	}
 
 	session := bearerToken[1]
 
-	if err := a.db.IsValidSession(r.Context(), session); err != nil {
-		a.log.Error("unable to authenticate", zap.String("session", session), zap.Error(err))
+	if err := a.db.IsValidSession(ctx, session); err != nil {
+		a.log.Warn(ctx, "unable to authenticate",
+			slog.String("session", session),
+			log.Error(err),
+		)
 		return false, nil
 	}
 

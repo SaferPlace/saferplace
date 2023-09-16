@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
+	"golang.org/x/exp/slog"
 	"gopkg.in/yaml.v3"
 	"safer.place/internal/database/sqldatabase"
 	"safer.place/internal/storage/minio"
@@ -25,6 +26,10 @@ type Config struct {
 	Database  DatabaseConfig  `yaml:"database"`
 	Storage   StorageConfig   `yaml:"storage"`
 	Notifier  NotifierConfig  `yaml:"notifier"`
+}
+
+func (c Config) LogValue() slog.Value {
+	return slog.StringValue(fmt.Sprintf("%+v", c))
 }
 
 // WebserverConfig contains all configuration used to setup the webserver and middleware
@@ -127,6 +132,10 @@ func (d *Duration) UnmarshalText(text []byte) error {
 	return nil
 }
 
-func (d *Duration) String() string {
-	return time.Duration(*d).String()
+func (d Duration) LogValue() slog.Value {
+	return slog.DurationValue(time.Duration(d))
+}
+
+func (d Duration) String() string {
+	return time.Duration(d).String()
 }
