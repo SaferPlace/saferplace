@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "streetsidesoftware.code-spell-checker-british-english",
+        "mikestead.dotenv",
+        "golang.go",
+        "streetsidesoftware.code-spell-checker",
+        "humao.rest-client",
+        "davidanson.vscode-markdownlint"
+    ]
+}
