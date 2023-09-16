@@ -1,0 +1,28 @@
+{
+    "cSpell.language": "en-GB",
+    "cSpell.words": [
+        "direnv",
+        "envrc",
+        "Gardaí",
+        "otel",
+        "saferplace",
+        "workdir"
+    ],
+    "files.insertFinalNewline": true,
+    "editor.rulers": [100],
+    "[markdown]": {
+        "editor.rulers": [80],
+        "editor.unicodeHighlight.ambiguousCharacters": false,
+        "editor.unicodeHighlight.invisibleCharacters": false,
+        "diffEditor.ignoreTrimWhitespace": false,
+        "editor.wordWrap": "on",
+        "editor.quickSuggestions": {
+            "comments": "off",
+            "strings": "off",
+            "other": "off"
+        },
+        "cSpell.fixSpellingWithRenameProvider": true,
+        "cSpell.advanced.feature.useReferenceProviderWithRename": true,
+        "cSpell.advanced.feature.useReferenceProviderRemove": "/^#+\\s/"
+    }
+}
