@@ -66,9 +66,9 @@ func StringsToDependencies(ss []string) []Dependency {
 
 type dependencies struct {
 	// always created dependencies
+	logger  log.Logger
 	tracing trace.TracerProvider
 	metrics *prometheus.Registry
-	logger  log.Logger
 
 	// dynamically created dependencies
 	database database.Database
@@ -95,6 +95,12 @@ func createDependencies(ctx context.Context, cfg *config.Config, components []Co
 	}
 	mc = append(mc, tracingCloser)
 	deps.tracing = tracing
+
+	deps.logger.Debug(ctx, "tracing initialized",
+		slog.Bool("enabled", cfg.Tracing.Enabled),
+		slog.String("endpoint", cfg.Tracing.Endpoint),
+		slog.Float64("sampling_ratio", cfg.Tracing.SamplingRatio),
+	)
 
 	deps.logger.Debug(ctx, "initializing dependencies",
 		slog.Any("components", components),

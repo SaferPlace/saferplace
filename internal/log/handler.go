@@ -7,6 +7,8 @@ import (
 	"log/slog"
 	"strings"
 	"time"
+
+	"go.opentelemetry.io/otel/trace"
 )
 
 // handler is a new handler with a more human readable output which takes less space.
@@ -32,14 +34,57 @@ func NewHandler(out io.Writer, level slog.Level) *handler {
 }
 
 func (h *handler) Handle(ctx context.Context, r slog.Record) error {
-	kvs := make([]string, 0, r.NumAttrs())
+	builder := new(strings.Builder)
+	if !r.Time.IsZero() {
+		builder.WriteString(r.Time.Format(time.RFC3339Nano) + " ")
+	}
+	builder.WriteString(r.Level.String() + "\t" + r.Message + "\t")
 	r.Attrs(func(a slog.Attr) bool {
-		kvs = append(kvs, strings.Join(append(h.groups, a.Key), ".")+"="+a.Value.String())
+		h.appendAttr(builder, a)
 		return true
 	})
-	fmt.Fprintf(h.out, "%s %s\t%s\t%s\n",
-		r.Time.Format(time.RFC3339Nano), r.Level, r.Message, strings.Join(kvs, " "))
+
+	extraAttr := h.attrs[:]
+	// Add the tracing information if available.
+	span := trace.SpanFromContext(ctx)
+	if traceID := span.SpanContext().TraceID(); traceID.IsValid() {
+		extraAttr = append(extraAttr,
+			slog.String("trace_id", traceID.String()),
+			slog.String("span_id", span.SpanContext().SpanID().String()),
+		)
+	}
+
+	for _, attr := range extraAttr {
+		h.appendAttr(builder, attr)
+	}
+
+	fmt.Fprintln(h.out, builder.String())
 	return nil
+}
+
+func (h *handler) appendAttr(builder *strings.Builder, a slog.Attr) {
+	a.Value = a.Value.Resolve()
+	// ignore empty attr
+	if a.Equal(slog.Attr{}) {
+		return
+	}
+	switch a.Value.Kind() {
+	case slog.KindString:
+		builder.WriteString(fmt.Sprintf("%s=%q", a.Key, a.Value.String()) + " ")
+	case slog.KindTime:
+		builder.WriteString(a.Key + "=" + a.Value.Time().Format(time.RFC3339Nano) + " ")
+	case slog.KindGroup:
+		attrs := a.Value.Group()
+		if len(attrs) == 0 {
+			return
+		}
+		for _, ga := range attrs {
+			ga.Key = a.Key + "." + ga.Key
+			h.appendAttr(builder, ga)
+		}
+	default:
+		builder.WriteString(fmt.Sprintf("%s=%s", a.Key, a.Value.String()) + " ")
+	}
 }
 
 func (h *handler) clone() *handler {
