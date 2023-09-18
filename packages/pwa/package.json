@@ -17,7 +17,7 @@
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.3",
-    "@mui/material": "^5.14.7",
+    "@mui/material": "^5.14.9",
     "@mui/system": "^5.14.8",
     "@saferplace/api": "^0.0.18",
     "i18next": "^23.5.1",
