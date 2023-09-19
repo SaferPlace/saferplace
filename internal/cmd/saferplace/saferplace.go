@@ -3,6 +3,7 @@ package saferplace
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	_ "net/http/pprof"
 
@@ -83,8 +84,7 @@ func Run(ctx context.Context, components []Component, cfg *config.Config) (err e
 	}
 
 	srv, err := webserver.New(
-		// TODO: Enable slog in webserver
-		// webserver.Logger(deps.logger.With(slog.String("component", "server"))),
+		webserver.Logger(deps.logger.Unwrap().With(slog.String("component", "server"))),
 		webserver.Services(services...),
 		webserver.TLSConfig(tlsConfig),
 		webserver.Middlewares(middlewares...),

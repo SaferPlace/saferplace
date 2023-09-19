@@ -17,7 +17,7 @@ func main() {
 }
 
 func run() error {
-	configFile := flag.String("config", "", "Config file")
+	configFile := flag.String("config", "/etc/saferplace/config.yaml", "Config file")
 	flag.Parse()
 
 	components := saferplace.AllComponents()

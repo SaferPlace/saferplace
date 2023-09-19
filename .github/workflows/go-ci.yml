@@ -93,7 +93,7 @@ jobs:
         go-version-file: 'go.mod'
 
     - name: Build
-      run: go build ./cmd/saferplace -o saferplace
+      run: go build -o saferplace ./cmd/saferplace 
     # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift).
     # If this step fails, then you should remove it and run the build manually (see below)
     - name: Autobuild
