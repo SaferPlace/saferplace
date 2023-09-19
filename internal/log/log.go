@@ -15,6 +15,7 @@ type Logger interface {
 	Error(context.Context, string, ...slog.Attr)
 
 	With(...slog.Attr) Logger
+	Unwrap() *slog.Logger
 }
 
 var _ Logger = (*logger)(nil)
@@ -58,6 +59,11 @@ func (l *logger) With(args ...slog.Attr) Logger {
 		return l
 	}
 	return New(l.l.Handler().WithAttrs(args))
+}
+
+// Unwrap returns the underlying [slog.Logger]
+func (l *logger) Unwrap() *slog.Logger {
+	return l.l
 }
 
 // Error is the standard Entry for when we want to log an error
