@@ -13,7 +13,7 @@ require (
 	github.com/minio/minio-go/v7 v7.0.63
 	github.com/saferplace/webserver-go v0.0.6
 	go.opentelemetry.io/otel v1.18.0
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.17.0
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.18.0
 	go.opentelemetry.io/otel/sdk v1.18.0
 	go.opentelemetry.io/otel/trace v1.18.0
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
@@ -21,6 +21,8 @@ require (
 	google.golang.org/grpc v1.58.1
 	google.golang.org/protobuf v1.31.0
 )
+
+require github.com/kr/text v0.2.0 // indirect
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
