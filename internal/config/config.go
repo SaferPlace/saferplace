@@ -10,6 +10,7 @@ import (
 	"golang.org/x/exp/slog"
 	"gopkg.in/yaml.v3"
 	"safer.place/internal/database/sqldatabase"
+	"safer.place/internal/database/surreal"
 	"safer.place/internal/storage/minio"
 	"safer.place/internal/tracing"
 )
@@ -52,7 +53,8 @@ type QueueConfig struct {
 type DatabaseConfig struct {
 	Provider string `yaml:"provider" default:"sql"`
 
-	SQL sqldatabase.Config `yaml:"sql"`
+	SQL     *sqldatabase.Config `yaml:"sql"`
+	Surreal *surreal.Config     `yaml:"surreal"`
 }
 
 // StorageConfig configures the storage for user uploads.

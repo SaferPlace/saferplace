@@ -15,6 +15,9 @@ import (
 	"golang.org/x/exp/slices"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"safer.place/internal/database"
+
+	// Acceptable database drivers
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // Config of the SQLDatabase
@@ -42,7 +45,7 @@ type Database struct {
 }
 
 // New creates a new SQL database
-func New(cfg Config) (*Database, error) {
+func New(cfg *Config) (*Database, error) {
 	db, err := sql.Open(cfg.Driver, cfg.DSN)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open database: %w", err)

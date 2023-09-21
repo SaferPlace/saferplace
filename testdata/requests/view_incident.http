@@ -1,0 +1,7 @@
+POST http://localhost:8001/viewer.v1.ViewerService/ViewIncident
+Content-Type: application/json
+X-Email: testdata@safer.place
+
+{
+    "id": "REPLACE ME FOR TESTING"
+}

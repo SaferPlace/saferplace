@@ -145,8 +145,9 @@ func registerConsumer(ctx context.Context, cfg *config.Config, deps *dependencie
 
 func registerReview(_ context.Context, _ *config.Config, deps *dependencies) (service.Service, error) {
 	return reviewv1.Register(
-		deps.database,
-		deps.logger.With(slog.String("service", "reviewv1")),
+		reviewv1.Database(deps.database),
+		reviewv1.Logger(deps.logger.With(slog.String("service", "reviewv1"))),
+		reviewv1.Tracer(deps.tracing.Tracer("review")),
 	), nil
 }
 

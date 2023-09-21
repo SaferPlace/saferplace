@@ -39,3 +39,21 @@ services:
     environment:
       - MINIO_ROOT_USER=saferplace
       - MINIO_ROOT_PASSWORD=supersecret
+
+  surrealdb:
+    entrypoint: 
+      - /surreal 
+      - start 
+      - --user
+      - saferplace
+      - --pass
+      - supersecret
+    image: surrealdb/surrealdb:1.0.0
+    ports:
+      - 8000:8000
+    environment:
+      # Why not working???
+      - SURREAL_TRACING_TRACER=otlp
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+    depends_on:
+      - otel-collector

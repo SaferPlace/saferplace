@@ -56,26 +56,7 @@ func (s *Service) ViewInRadius(
 	*connect.Response[viewer.ViewInRadiusResponse],
 	error,
 ) {
-	s.log.Info(ctx, "getting incidents in radius",
-		slog.Float64("radius", req.Msg.Radius),
-		// Lattitude and Longitude logs omitted on purpose to avoid
-		// PII (location data) in logs.
-	)
-
-	if req.Msg.Center == nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument,
-			errors.New("missing center"),
-		)
-	}
-
-	incidents, err := s.db.IncidentsInRadius(ctx, req.Msg.Center, req.Msg.Radius)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeUnavailable, err)
-	}
-
-	return connect.NewResponse(&viewer.ViewInRadiusResponse{
-		Incidents: incidents,
-	}), nil
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("deprecated"))
 }
 
 // ViewInRegion shows all incidents in the specified region.
