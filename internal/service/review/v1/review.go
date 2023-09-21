@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
+	"go.opentelemetry.io/otel/trace"
 
 	"api.safer.place/incident/v1"
 	pb "api.safer.place/review/v1"
@@ -21,20 +22,23 @@ import (
 
 // Service is the review service
 type Service struct {
-	db  database.Database
-	log log.Logger
+	tracer trace.Tracer
+	db     database.Review
+	log    log.Logger
 }
 
 // Register the review service
 func Register(
-	db database.Database,
-	log log.Logger,
+	opts ...Option,
 ) service.Service {
 	return func(interceptors ...connect.Interceptor) (string, http.Handler) {
-		return connectpb.NewReviewServiceHandler(&Service{
-			db:  db,
-			log: log,
-		}, connect.WithInterceptors(interceptors...))
+		s := &Service{}
+
+		for _, opt := range opts {
+			opt(s)
+		}
+
+		return connectpb.NewReviewServiceHandler(s, connect.WithInterceptors(interceptors...))
 	}
 }
 
@@ -102,19 +106,12 @@ func (s *Service) IncidentsWithoutReview(
 	*connect.Response[pb.IncidentsWithoutReviewResponse],
 	error,
 ) {
+	s.log.Debug(ctx, "listing incidents without review")
 	incidents, err := s.db.IncidentsWithoutReview(ctx)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
-	basicIncidents := make([]*pb.BasicIncidentDetails, 0, len(incidents))
-	for _, inc := range incidents {
-		basicIncidents = append(basicIncidents, &pb.BasicIncidentDetails{
-			Id:          inc.Id,
-			Description: inc.Description,
-			Timestamp:   inc.Timestamp.Seconds,
-		})
-	}
 	return connect.NewResponse(&pb.IncidentsWithoutReviewResponse{
-		Incidents: basicIncidents,
+		Incidents: incidents,
 	}), nil
 }

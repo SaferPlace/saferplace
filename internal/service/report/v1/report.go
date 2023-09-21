@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"connectrpc.com/connect"
 	"github.com/google/uuid"
@@ -55,7 +56,7 @@ func (s *Service) SendReport(
 ) {
 	incident := req.Msg.Incident
 	// Override the ID no matter what its set to.
-	incident.Id = uuid.New().String()
+	incident.Id = strings.ReplaceAll(uuid.New().String(), "-", "_")
 	incident.Timestamp = timestamppb.Now()
 
 	if err := s.validator.Validate(incident); err != nil {

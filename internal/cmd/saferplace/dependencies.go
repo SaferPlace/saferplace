@@ -23,6 +23,7 @@ import (
 	"safer.place/internal/config"
 	"safer.place/internal/database"
 	"safer.place/internal/database/sqldatabase"
+	"safer.place/internal/database/surreal"
 	"safer.place/internal/log"
 	"safer.place/internal/notifier"
 	"safer.place/internal/notifier/lognotifier"
@@ -151,10 +152,22 @@ func newTLSConfig(ctx context.Context, cfg config.CertConfig) (v *tls.Config, er
 }
 
 func registerDatabase(_ context.Context, cfg *config.Config, deps *dependencies) (err error) {
+	tracer := deps.tracing.Tracer("database",
+		trace.WithInstrumentationAttributes(
+			attribute.String("provider", cfg.Database.Provider),
+		),
+	)
+	logger := deps.logger.With(slog.String("database", cfg.Database.Provider))
+
 	var v database.Database
 	switch cfg.Database.Provider {
 	case "sql":
 		v, err = sqldatabase.New(cfg.Database.SQL)
+	case "surreal":
+		v, err = surreal.New(cfg.Database.Surreal,
+			surreal.Logger(logger),
+			surreal.Tracer(tracer),
+		)
 	default:
 		err = errProviderNotFound
 	}
