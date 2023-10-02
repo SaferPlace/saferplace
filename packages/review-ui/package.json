@@ -12,7 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@babel/core": "^7.22.20",
+    "@babel/core": "^7.23.0",
     "@babel/plugin-syntax-jsx": "^7.22.5",
     "@bufbuild/connect": "^0.13.0",
     "@bufbuild/connect-web": "^0.13.0",
