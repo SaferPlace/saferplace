@@ -14,7 +14,6 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/google/uuid"
-	"golang.org/x/exp/slices"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"safer.place/internal/database"
 
@@ -181,7 +180,18 @@ func (db *Database) SaveReview(
 	id string,
 	res incident.Resolution,
 	comment *incident.Comment,
-) error {
+) (err error) {
+	ctx, span := db.tracer.Start(ctx, "SaveReview")
+	defer func() {
+		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
+			span.RecordError(err)
+		} else {
+			span.SetStatus(codes.Ok, "")
+		}
+		span.End()
+	}()
+
 	tx, err := db.db.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("unable to start transaction: %w", err)
@@ -221,14 +231,27 @@ func (db *Database) SaveReview(
 }
 
 // ViewIncident recovers incident information
-func (db *Database) ViewIncident(ctx context.Context, id string) (*incident.Incident, error) {
+func (db *Database) ViewIncident(
+	ctx context.Context, id string,
+) (inc *incident.Incident, err error) {
+	ctx, span := db.tracer.Start(ctx, "ViewIncident")
+	defer func() {
+		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
+			span.RecordError(err)
+		} else {
+			span.SetStatus(codes.Ok, "")
+		}
+		span.End()
+	}()
+
 	tx, err := db.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("unable to start transaction: %w", err)
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	inc, err := scanIncident(tx.Stmt(db.viewIncidentStmt).QueryRow(id))
+	inc, err = scanIncident(tx.Stmt(db.viewIncidentStmt).QueryRow(id))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, database.ErrDoesNotExist
@@ -269,7 +292,20 @@ func (db *Database) ViewIncident(ctx context.Context, id string) (*incident.Inci
 }
 
 // IncidentsWithoutReview gets all the incidents which have the UNDEFINED
-func (db *Database) IncidentsWithoutReview(ctx context.Context) ([]*incident.Incident, error) {
+func (db *Database) IncidentsWithoutReview(
+	ctx context.Context,
+) (incidents []*incident.Incident, err error) {
+	ctx, span := db.tracer.Start(ctx, "IncidentsWithoutReview")
+	defer func() {
+		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
+			span.RecordError(err)
+		} else {
+			span.SetStatus(codes.Ok, "")
+		}
+		span.End()
+	}()
+
 	rows, err := db.incidentsWithoutReviewStmt.QueryContext(ctx,
 		incident.Resolution_RESOLUTION_UNSPECIFIED.String(),
 	)
@@ -280,7 +316,7 @@ func (db *Database) IncidentsWithoutReview(ctx context.Context) ([]*incident.Inc
 		return nil, fmt.Errorf("unable list incidents: %w", err)
 	}
 
-	incidents := make([]*incident.Incident, 0)
+	incidents = make([]*incident.Incident, 0)
 	for rows.Next() {
 		inc, err := scanIncident(rows)
 		if err != nil {
@@ -291,39 +327,6 @@ func (db *Database) IncidentsWithoutReview(ctx context.Context) ([]*incident.Inc
 		}
 		incidents = append(incidents, inc)
 	}
-
-	return incidents, nil
-}
-
-// IncidentsInRadius gets all incidents and then does some maths to filter it to only include
-// incidents in the provided radius
-func (db *Database) IncidentsInRadius(
-	ctx context.Context, center *incident.Coordinates, radius float64,
-) ([]*incident.Incident, error) {
-	rows, err := db.incidentsInRadiusStmt.QueryContext(ctx)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return []*incident.Incident{}, nil
-		}
-		return nil, fmt.Errorf("unable list incidents: %w", err)
-	}
-
-	incidents := make([]*incident.Incident, 0)
-	for rows.Next() {
-		inc, err := scanIncident(rows)
-		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				return nil, database.ErrDoesNotExist
-			}
-			return nil, fmt.Errorf("unable to get incident info: %w", err)
-		}
-		incidents = append(incidents, inc)
-	}
-
-	// Delete all incidents which are outside of the given radius
-	incidents = slices.DeleteFunc(incidents, func(i *incident.Incident) bool {
-		return distance(center.Lat, center.Lon, i.Coordinates.Lat, i.Coordinates.Lon) > radius
-	})
 
 	return incidents, nil
 }
@@ -331,7 +334,18 @@ func (db *Database) IncidentsInRadius(
 // IncidentsInRegion returns all the incidents in the specified region
 func (db *Database) IncidentsInRegion(
 	ctx context.Context, since time.Time, region *viewer.Region,
-) ([]*incident.Incident, error) {
+) (incidents []*incident.Incident, err error) {
+	ctx, span := db.tracer.Start(ctx, "IncidentsInRegion")
+	defer func() {
+		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
+			span.RecordError(err)
+		} else {
+			span.SetStatus(codes.Ok, "")
+		}
+		span.End()
+	}()
+
 	rows, err := db.incidentsInRegionStmt.QueryContext(ctx,
 		since.Unix(),
 		region.North/100,
@@ -346,7 +360,7 @@ func (db *Database) IncidentsInRegion(
 		return nil, fmt.Errorf("unable list incidents: %w", err)
 	}
 
-	incidents := make([]*incident.Incident, 0)
+	incidents = make([]*incident.Incident, 0)
 	for rows.Next() {
 		inc, err := scanIncident(rows)
 		if err != nil {
@@ -377,7 +391,18 @@ func (db *Database) SaveSession(ctx context.Context, session string) error {
 // AlertingIncidents returns the incidents which are alerting and match the filters
 func (db *Database) AlertingIncidents(
 	ctx context.Context, since time.Time, region *viewer.Region,
-) ([]*incident.Incident, error) {
+) (incidents []*incident.Incident, err error) {
+	ctx, span := db.tracer.Start(ctx, "AlertingIncidents")
+	defer func() {
+		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
+			span.RecordError(err)
+		} else {
+			span.SetStatus(codes.Ok, "")
+		}
+		span.End()
+	}()
+
 	rows, err := db.alertingIncidentsStmt.QueryContext(ctx,
 		since.Unix(),
 		region.North/100,
@@ -392,7 +417,7 @@ func (db *Database) AlertingIncidents(
 		return nil, fmt.Errorf("unable list incidents: %w", err)
 	}
 
-	incidents := make([]*incident.Incident, 0)
+	incidents = make([]*incident.Incident, 0)
 	for rows.Next() {
 		inc, err := scanIncident(rows)
 		if err != nil {
