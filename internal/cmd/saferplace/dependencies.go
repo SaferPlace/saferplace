@@ -162,7 +162,9 @@ func registerDatabase(_ context.Context, cfg *config.Config, deps *dependencies)
 	var v database.Database
 	switch cfg.Database.Provider {
 	case "sql":
-		v, err = sqldatabase.New(cfg.Database.SQL)
+		v, err = sqldatabase.New(cfg.Database.SQL,
+			sqldatabase.Tracer(tracer),
+		)
 	case "surreal":
 		v, err = surreal.New(cfg.Database.Surreal,
 			surreal.Logger(logger),
