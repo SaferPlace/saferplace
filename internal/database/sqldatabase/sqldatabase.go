@@ -10,6 +10,8 @@ import (
 
 	"api.safer.place/incident/v1"
 	"api.safer.place/viewer/v1"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/google/uuid"
 	"golang.org/x/exp/slices"
@@ -28,7 +30,8 @@ type Config struct {
 
 // Database contains the database connection
 type Database struct {
-	db *sql.DB
+	db     *sql.DB
+	tracer trace.Tracer
 
 	hasIncidentStmt            *sql.Stmt
 	saveIncidentStmt           *sql.Stmt
@@ -45,7 +48,7 @@ type Database struct {
 }
 
 // New creates a new SQL database
-func New(cfg *Config) (*Database, error) {
+func New(cfg *Config, opts ...Option) (*Database, error) {
 	db, err := sql.Open(cfg.Driver, cfg.DSN)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open database: %w", err)
@@ -105,7 +108,7 @@ func New(cfg *Config) (*Database, error) {
 		return nil, fmt.Errorf("unable to prepare isValidSession query: %w", err)
 	}
 
-	return &Database{
+	d := &Database{
 		db:                         db,
 		hasIncidentStmt:            hasIncidentStmt,
 		saveIncidentStmt:           saveIncidentStmt,
@@ -119,11 +122,28 @@ func New(cfg *Config) (*Database, error) {
 		isValidSessionStmt:         isValidSessionStmt,
 		alertingIncidentsStmt:      alertingIncidentsStmt,
 		incidentsInRegionStmt:      incidentsInRegionStmt,
-	}, nil
+	}
+
+	for _, opt := range opts {
+		opt(d)
+	}
+
+	return d, validate(d)
 }
 
 // SaveIncident to the sql database
-func (db *Database) SaveIncident(ctx context.Context, inc *incident.Incident) error {
+func (db *Database) SaveIncident(ctx context.Context, inc *incident.Incident) (err error) {
+	ctx, span := db.tracer.Start(ctx, "SaveIncident")
+	defer func() {
+		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
+			span.RecordError(err)
+		} else {
+			span.SetStatus(codes.Ok, "")
+		}
+		span.End()
+	}()
+
 	tx, err := db.db.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("unable to start transaction: %w", err)
@@ -408,7 +428,19 @@ func (db *Database) IsValidSession(ctx context.Context, session string) error {
 	return nil
 }
 
-func (db *Database) hasIncident(ctx context.Context, tx *sql.Tx, id string) (bool, error) {
+func (db *Database) hasIncident(
+	ctx context.Context, tx *sql.Tx, id string,
+) (exists bool, err error) {
+	ctx, span := db.tracer.Start(ctx, "hasIncident")
+	defer func() {
+		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
+			span.RecordError(err)
+		} else {
+			span.SetStatus(codes.Ok, "")
+		}
+		span.End()
+	}()
 	// First check do we already have an entry, so we can return already exists
 	row := tx.Stmt(db.hasIncidentStmt).QueryRowContext(ctx, id)
 
