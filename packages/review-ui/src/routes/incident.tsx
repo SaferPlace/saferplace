@@ -70,7 +70,7 @@ function Review({incident, onSubmit}: Props) {
         />
         <TextField
           label='Time Submitted'
-          value={new Date(Number(incident.timestamp) * 1000)}
+          value={incident.timestamp?.toDate().toString()}
           disabled
           fullWidth
           margin='normal'
