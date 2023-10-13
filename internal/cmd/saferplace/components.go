@@ -59,22 +59,31 @@ var userComponents = ComponentRegisterMap{
 func StringsToComponents(ss []string) []Component {
 	res := make([]Component, 0, len(ss))
 	for _, s := range ss {
-		switch s {
-		case string(ConsumerComponent):
-			res = append(res, ConsumerComponent)
-		case string(ReviewComponent):
-			res = append(res, ReportComponent)
-		case string(ReportComponent):
-			res = append(res, ReportComponent)
-		case string(UploaderComponent):
-			res = append(res, UploaderComponent)
-		case string(ViewerComponent):
-			res = append(res, ViewerComponent)
-		default:
-			panic(fmt.Sprintf("unrecognised component %q", s))
+		c, err := ParseComponent(s)
+		if err != nil {
+			panic(err)
 		}
+		res = append(res, c)
 	}
 	return res
+}
+
+// ParseComponent ensures that each component is correctl
+func ParseComponent(s string) (Component, error) {
+	switch s {
+	case string(ConsumerComponent):
+		return ConsumerComponent, nil
+	case string(ReviewComponent):
+		return ReviewComponent, nil
+	case string(ReportComponent):
+		return ReportComponent, nil
+	case string(UploaderComponent):
+		return UploaderComponent, nil
+	case string(ViewerComponent):
+		return ViewerComponent, nil
+	default:
+		return "", fmt.Errorf("unrecognised component %q", s)
+	}
 }
 
 // ComponentsToStrings returns a slice of strings from the slice of components.
