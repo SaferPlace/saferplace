@@ -6,15 +6,9 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// Producer allows to publish messages
+// Producer allows to publish messages. The metadata is extracted from the producer in a way that the producer desires
 type Producer[T proto.Message] interface {
-	Produce(context.Context, T) error
-}
-
-type Message[T proto.Message] interface {
-	Body() T
-	Ack()
-	Nack()
+	Produce(context.Context, Message[T]) error
 }
 
 // Consumer allows to consume messages

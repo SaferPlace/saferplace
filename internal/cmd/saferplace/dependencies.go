@@ -184,7 +184,15 @@ func registerQueue(_ context.Context, cfg *config.Config, deps *dependencies) (e
 	var v queue.Queue[*incident.Incident]
 	switch cfg.Queue.Provider {
 	case "memory":
-		v = memory.New[*incident.Incident]()
+		v = memory.New[*incident.Incident](
+			memory.Tracer[*incident.Incident](
+				deps.tracing.Tracer("queue",
+					trace.WithInstrumentationAttributes(
+						attribute.String("provider", "memory"),
+					),
+				),
+			),
+		)
 	default:
 		err = errProviderNotFound
 	}

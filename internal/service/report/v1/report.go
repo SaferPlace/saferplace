@@ -67,7 +67,7 @@ func (s *Service) SendReport(
 		slog.String("id", incident.Id),
 	)
 
-	if err := s.queue.Produce(ctx, incident); err != nil {
+	if err := s.queue.Produce(ctx, queue.NewMessage(incident, req.Header())); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
