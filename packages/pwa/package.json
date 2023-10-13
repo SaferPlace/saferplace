@@ -19,7 +19,7 @@
     "@mui/icons-material": "^5.14.12",
     "@mui/material": "^5.14.9",
     "@mui/system": "^5.14.8",
-    "@saferplace/api": "^0.0.18",
+    "@saferplace/api": "^0.0.19",
     "i18next": "^23.5.1",
     "i18next-browser-languagedetector": "^7.1.0",
     "leaflet": "^1.9.4",
