@@ -2,15 +2,15 @@ import { CssBaseline } from '@mui/material'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, LoaderFunctionArgs, RouterProvider } from 'react-router-dom'
-import Incident, { Props } from './routes/incident'
+import IncidentView, { Props } from './routes/incident'
 import Pending from './routes/pending'
 import Root from './routes/root'
 import { ReviewService } from '@saferplace/api/review/v1/review_connect'
-import { BasicIncidentDetails } from '@saferplace/api/review/v1/review_pb'
 import ErrorPage from './routes/error'
 
 import { createPromiseClient, Interceptor } from '@bufbuild/connect'
 import { createConnectTransport } from '@bufbuild/connect-web'
+import { Incident } from '@saferplace/api/incident/v1/incident_pb'
 
 const addReviewerEmailInterceptor: Interceptor = (next) => async (req) => {
   req.header.set('email', localStorage.getItem('email') ?? '')
@@ -25,7 +25,7 @@ const client = createPromiseClient(
   }),
 )
 
-async function pendingLoader(): Promise<BasicIncidentDetails[]> {
+async function pendingLoader(): Promise<Incident[]> {
   const res = await client.incidentsWithoutReview({})
   return res.incidents
 }
@@ -49,7 +49,7 @@ const router = createBrowserRouter([
         loader: pendingLoader,
       }, {
         path: 'incident/:id',
-        element: <Incident />,
+        element: <IncidentView />,
         loader: incidentLoader,
       }
     ],

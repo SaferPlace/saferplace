@@ -136,8 +136,8 @@ importers:
         specifier: ^5.14.9
         version: 5.14.9(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.2.21)(react-dom@18.2.0)(react@18.2.0)
       '@saferplace/api':
-        specifier: ^0.0.18
-        version: 0.0.18
+        specifier: ^0.0.19
+        version: 0.0.19
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
@@ -2307,6 +2307,12 @@ packages:
       '@bufbuild/protobuf': 1.3.3
     dev: false
 
+  /@saferplace/api@0.0.19:
+    resolution: {integrity: sha512-/B8z018Kuk7RRYrqNDBqIzim/Keqo8TAT0PoyOEKHb4s7Zv0Dix9I976k/qGxB8jgMNvKr78AYr05BGR5YdCTQ==, tarball: https://npm.pkg.github.com/download/@saferplace/api/0.0.19/881e23a49239ad8076bcacdb45590d9e3b9cc0dd}
+    dependencies:
+      '@bufbuild/protobuf': 1.3.3
+    dev: false
+
   /@surma/rollup-plugin-off-main-thread@2.2.3:
     resolution: {integrity: sha512-lR8q/9W7hZpMWweNiAKU7NQerBnzQQLvi8qnTDU/fxItPhtZVMbPV3lbCwjhIlNBe9Bbr5V+KHshvWmVSG9cxQ==}
     dependencies:
@@ -2346,7 +2352,7 @@ packages:
     dev: true
 
   /@types/estree@0.0.39:
-    resolution: {integrity: sha512-FsxUssmxNyJ13NaHH667bih2/7uX9mlvrouCwX1TRdBG2rDEnepYvvEMObUz8nZtmPGqOFvj6wX3tBA64+bGxg==, tarball: https://npm.pkg.github.com/download/@types/estree/0.0.39/bb2c0789933b6937355963b04f5e914d07979363}
+    resolution: {integrity: sha512-EYNwp3bU+98cpU4lAWYYL7Zz+2gryWH1qbdDTidVd6hkiR6weksdbMadyXKXNPEkQFhXM+hVO9ZygomHXp+AIw==}
     dev: true
 
   /@types/geojson@7946.0.10:
@@ -2361,10 +2367,6 @@ packages:
     resolution: {integrity: sha512-Caa1lYOgKVqDkDZVWkto2Z5JtVo09spEaUt2S69LiugbBpoqQu92HYFMGUbYezZbnBkyOxMNPXHSgRrRY5UyIA==}
     dependencies:
       '@types/geojson': 7946.0.10
-    dev: true
-
-  /@types/node@17.0.18:
-    resolution: {integrity: sha512-eKj4f/BsN/qcculZiRSujogjvp5O/k4lOW5m35NopjZM/QwLOR075a8pJW5hD+Rtdm2DaCVPENS6KtSQnUD6BA==, tarball: https://npm.pkg.github.com/download/@types/node/17.0.18/3b4fed5cfb58010e3a2be4b6e74615e4847f1074}
     dev: true
 
   /@types/node@20.5.3:
@@ -2404,9 +2406,9 @@ packages:
       csstype: 3.1.2
 
   /@types/resolve@1.17.1:
-    resolution: {integrity: sha512-yy7HuzQhj0dhGpD8RLXSZWEkLsV9ibvxvi6EiJ3bkqLAO1RGo0WbkWQiwpRlSFymTJRz0d3k5LM3kkx8ArDbLw==, tarball: https://npm.pkg.github.com/download/@types/resolve/1.17.1/3afd6ad8967c77e4376c598a82ddd58f46ec45d6}
+    resolution: {integrity: sha512-yy7HuzQhj0dhGpD8RLXSZWEkLsV9ibvxvi6EiJ3bkqLAO1RGo0WbkWQiwpRlSFymTJRz0d3k5LM3kkx8ArDbLw==}
     dependencies:
-      '@types/node': 17.0.18
+      '@types/node': 20.5.3
     dev: true
 
   /@types/scheduler@0.16.3:
@@ -2417,7 +2419,7 @@ packages:
     dev: true
 
   /@types/trusted-types@2.0.2:
-    resolution: {integrity: sha512-F5DIZ36YVLE+PN+Zwws4kJogq47hNgX3Nx6WyDJ3kcplxyke3XIzB8uK5n/Lpm1HBsbGzd6nmGehL8cPekP+Tg==, tarball: https://npm.pkg.github.com/download/@types/trusted-types/2.0.2/fc25ad9943bcac11cceb8168db4f275e0e72e756}
+    resolution: {integrity: sha512-F5DIZ36YVLE+PN+Zwws4kJogq47hNgX3Nx6WyDJ3kcplxyke3XIzB8uK5n/Lpm1HBsbGzd6nmGehL8cPekP+Tg==}
     dev: true
 
   /@typescript-eslint/eslint-plugin@6.7.0(@typescript-eslint/parser@6.7.3)(eslint@8.51.0)(typescript@5.2.2):
@@ -3673,7 +3675,7 @@ packages:
     resolution: {integrity: sha512-KWYVV1c4i+jbMpaBC+U++4Va0cp8OisU185o73T1vo99hqi7w8tSJfUXYswwqqrjzwxa6KpRK54WhPvwf5w6PQ==}
     engines: {node: '>= 10.13.0'}
     dependencies:
-      '@types/node': 17.0.18
+      '@types/node': 20.5.3
       merge-stream: 2.0.0
       supports-color: 7.2.0
     dev: true
