@@ -9,7 +9,7 @@ require (
 	github.com/bwmarrin/discordgo v0.27.1
 	github.com/google/uuid v1.3.1
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/mattn/go-sqlite3 v1.14.17
+	github.com/mattn/go-sqlite3 v1.14.18
 	github.com/minio/minio-go/v7 v7.0.63
 	github.com/saferplace/webserver-go v0.0.6
 	go.opentelemetry.io/otel v1.19.0
