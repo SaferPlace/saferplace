@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	api.safer.place v0.0.19
-	connectrpc.com/connect v1.11.1
+	connectrpc.com/connect v1.13.0
 	connectrpc.com/otelconnect v0.5.0
 	github.com/bwmarrin/discordgo v0.27.1
 	github.com/google/uuid v1.3.1
