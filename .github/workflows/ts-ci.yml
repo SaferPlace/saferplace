@@ -36,7 +36,7 @@ jobs:
         version: latest
 
     - name: Setup Node
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         registry-url: 'https://npm.pkg.github.com'
         scope: '@saferplace'
@@ -97,7 +97,7 @@ jobs:
 
       - name: Setup Node
         if: steps.changes.outputs.affected == 'true'
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@saferplace'
