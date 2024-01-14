@@ -9,7 +9,7 @@ import (
 	"golang.org/x/exp/maps"
 	"golang.org/x/sync/errgroup"
 	"safer.place/internal/config"
-	"safer.place/internal/review"
+	"safer.place/internal/consumer"
 	"safer.place/internal/service"
 
 	// Registered services
@@ -138,15 +138,16 @@ func createServices(ctx context.Context, cfg *config.Config, wantedComponents []
 }
 
 func registerConsumer(ctx context.Context, cfg *config.Config, deps *dependencies, eg *errgroup.Group) error {
-	consumer := review.New(
-		deps.logger.With(slog.String("component", "review")),
-		deps.queue,
-		deps.database,
-		deps.notifer,
+	c := consumer.New(
+		consumer.Logger(deps.logger.With(slog.String("component", "review"))),
+		consumer.Consumer(deps.queue),
+		consumer.Database(deps.database),
+		consumer.Notifier(deps.notifer),
+		consumer.Tracer(deps.tracing.Tracer("consumer")),
 	)
 
 	eg.Go(func() error {
-		return consumer.Run(ctx)
+		return c.Run(ctx)
 	})
 
 	return nil

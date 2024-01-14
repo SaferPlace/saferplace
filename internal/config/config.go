@@ -6,13 +6,14 @@ import (
 	"os"
 	"time"
 
+	"github.com/saferplace/tracing-go"
+
 	"github.com/kelseyhightower/envconfig"
 	"golang.org/x/exp/slog"
 	"gopkg.in/yaml.v3"
 	"safer.place/internal/database/sqldatabase"
 	"safer.place/internal/database/surreal"
 	"safer.place/internal/storage/minio"
-	"safer.place/internal/tracing"
 )
 
 // Config containing all configuration for saferplace.
