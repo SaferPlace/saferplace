@@ -35,10 +35,14 @@ func Run(ctx context.Context, components []Component, cfg *config.Config) (err e
 	}
 
 	// shared interceptors
+	tracingInteceptor, err := otelconnect.NewInterceptor(
+		otelconnect.WithTracerProvider(deps.tracing),
+	)
+	if err != nil {
+		return fmt.Errorf("unable to setup tracing interceptor: %w", err)
+	}
 	interceptors := []connect.Interceptor{
-		otelconnect.NewInterceptor(
-			otelconnect.WithTracerProvider(deps.tracing),
-		),
+		tracingInteceptor,
 	}
 
 	if err := createHeadlessComponents(ctx, cfg, components, deps, eg); err != nil {

@@ -1,4 +1,4 @@
-package review
+package consumer
 
 import (
 	"context"
@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"log/slog"
 
-	"api.safer.place/incident/v1"
+	"go.opentelemetry.io/otel/trace"
 
 	"safer.place/internal/database"
 	"safer.place/internal/log"
 	"safer.place/internal/notifier"
 	"safer.place/internal/queue"
+
+	"api.safer.place/incident/v1"
 )
 
 // Review is a big wrapper around incoming reviews
@@ -20,22 +22,19 @@ type Review struct {
 	reviewNotifier notifier.Notifier
 	db             database.Database
 
-	log log.Logger
+	log    log.Logger
+	tracer trace.Tracer
 }
 
 // New review handler
-func New(
-	log log.Logger,
-	incoming queue.Consumer[*incident.Incident],
-	db database.Database,
-	reviewNotifier notifier.Notifier,
-) *Review {
-	return &Review{
-		log:            log,
-		reviewNotifier: reviewNotifier,
-		db:             db,
-		incoming:       incoming,
+func New(opts ...Option) *Review {
+	r := &Review{}
+
+	for _, opt := range opts {
+		opt(r)
 	}
+
+	return r
 }
 
 // Run the review process
@@ -54,6 +53,9 @@ func (r *Review) Run(ctx context.Context) error {
 }
 
 func (r *Review) handleIncoming(ctx context.Context) (err error) {
+	ctx, span := r.tracer.Start(ctx, "handleIncoming")
+	defer span.End()
+
 	msg, err := r.incoming.Consume(ctx)
 	if err != nil {
 		return fmt.Errorf("unable to receive: %w", err)
