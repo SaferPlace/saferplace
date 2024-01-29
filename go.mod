@@ -9,7 +9,7 @@ require (
 	connectrpc.com/connect v1.14.0
 	connectrpc.com/otelconnect v0.7.0
 	github.com/bwmarrin/discordgo v0.27.1
-	github.com/google/uuid v1.5.0
+	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mattn/go-sqlite3 v1.14.19
 	github.com/minio/minio-go/v7 v7.0.66
