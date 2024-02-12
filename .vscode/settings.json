@@ -1,13 +1,4 @@
 {
-    "cSpell.language": "en-GB",
-    "cSpell.words": [
-        "direnv",
-        "envrc",
-        "Gardaí",
-        "otel",
-        "saferplace",
-        "workdir"
-    ],
     "files.insertFinalNewline": true,
     "editor.rulers": [100],
     "[markdown]": {
@@ -20,9 +11,6 @@
             "comments": "off",
             "strings": "off",
             "other": "off"
-        },
-        "cSpell.fixSpellingWithRenameProvider": true,
-        "cSpell.advanced.feature.useReferenceProviderWithRename": true,
-        "cSpell.advanced.feature.useReferenceProviderRemove": "/^#+\\s/"
+        }
     }
 }
