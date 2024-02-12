@@ -12,7 +12,7 @@ require (
 	github.com/google/uuid v1.5.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mattn/go-sqlite3 v1.14.19
-	github.com/minio/minio-go/v7 v7.0.66
+	github.com/minio/minio-go/v7 v7.0.67
 	github.com/prometheus/client_golang v1.18.0
 	github.com/saferplace/tracing-go v0.1.0
 	github.com/saferplace/webserver-go v0.0.6
