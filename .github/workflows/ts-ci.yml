@@ -79,7 +79,7 @@ jobs:
       
       - name: Check Affected Workspaces
         id: changes
-        uses: dorny/paths-filter@v2.11.1
+        uses: dorny/paths-filter@v3.0.1
         with:
           filters: |
             affected:
