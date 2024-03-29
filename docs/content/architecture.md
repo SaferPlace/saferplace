@@ -101,12 +101,12 @@ the review UI.
 The reviewer uses the review UI to see the incident details. They judge the
 incident based on review criteria, and can add the following resolution:
 
-- Reject - The incident report is not up to our standards
-- Ignore - Keep the incident up for review, but comment on the incident, useful
-  for having a second opinion.
-- Accept - Incident is accepted, and will show up for users.
-- Alert - Incident has implications right now to people in the area, and if they
-  can, they should take caution.
+| Action | Description |
+|--------|-------------|
+| Reject | The incident report is not up to our standards |
+| Ignore | Keep the incident up for review, but comment on the incident for having a second opinion. |
+| Accept | Incident is accepted, and will show up for users. |
+| Alert  | Incident has implications right now to people in the area, and if they can, they should take caution. |
 
 The reviewer can also add further comments to each incident.
 
