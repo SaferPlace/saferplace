@@ -1,0 +1,42 @@
+name: Website
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docs'
+  schedule:
+    - cron: '36 8 * * 0'
+
+jobs:
+  # Spellecheck is handled by spellcheck.yml
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Hugo
+      uses: peaceiris/actions-hugo@v2
+      with:
+        hugo-version: 'latest'
+
+    - name: Build
+      working-directory: docs
+      run: hugo --minify
+    
+    - name: Deploy
+      uses: cloudflare/pages-action@v1
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        projectName: matrix.saferplace-web
+        accountId: 77fe99c5bfc86a6c12a8092954daec44
+        directory: docs/public
+        gitHubToken: ${{ github.token }}
