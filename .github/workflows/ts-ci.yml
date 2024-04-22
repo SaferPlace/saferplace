@@ -54,7 +54,7 @@ jobs:
       run: pnpm run ci:lint
 
     - name: Annotate Linting Results
-      uses: ataylorme/eslint-annotate-action@2.2.0
+      uses: ataylorme/eslint-annotate-action@3.0.0
       with:
         repo-token: "${{ github.token }}"
         report-json: eslint_report.json
