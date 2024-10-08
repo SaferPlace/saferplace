@@ -46,7 +46,7 @@ require (
 	github.com/prometheus/common v0.51.1 // indirect
 	github.com/prometheus/procfs v0.13.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
-	github.com/rs/cors v1.10.1 // indirect
+	github.com/rs/cors v1.11.0 // indirect
 	github.com/rs/xid v1.5.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.24.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.24.0 // indirect
