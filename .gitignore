@@ -6,3 +6,5 @@ node_modules/
 
 # Ignore the secret env vars
 .secret.env
+
+*/dist/*
