@@ -1,0 +1,67 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    main: ./cmd/saferplace
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+dockers:
+  - image_templates:
+      - "ghcr.io/SaferPlace/saferplace:{{ .Version }}"
+      - "ghcr.io/SaferPlace/saferplace:latest"
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+    use: buildx
+
+docker_signs:
+  - cmd: cosign
+    artifacts: all
+    args:
+      - "sign"
+      - "${artifact}"
+      - "--yes"
+
+docker_manifests:
+  - name_template: "ghcr.io/SaferPlace/saferplace:{{ .Version }}"
+    image_templates:
+      - "ghcr.io/SaferPlace/saferplace:{{ .Version }}-amd64"
+      - "ghcr.io/SaferPlace/saferplace:{{ .Version }}-arm64"
+  - name_template: "ghcr.io/SaferPlace/saferplace:latest"
+    image_templates:
+      - "ghcr.io/SaferPlace/saferplace:latest-amd64"
+      - "ghcr.io/SaferPlace/saferplace:latest-arm64"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "^ci:"
+
+release:
+  github:
+    owner: SaferPlace
+    name: saferplace

@@ -7,5 +7,4 @@ review-ui:
 
 .PHONY: realtime
 realtime: review-ui
-	@go run ./cmd/realtime
-
+	@go run ./cmd/saferplace
