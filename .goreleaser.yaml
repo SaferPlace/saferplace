@@ -1,4 +1,4 @@
-version: 2
+version: 1
 
 before:
   hooks:
@@ -33,14 +33,6 @@ dockers:
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.source={{.GitURL}}"
     use: buildx
-
-docker_signs:
-  - cmd: cosign
-    artifacts: all
-    args:
-      - "sign"
-      - "${artifact}"
-      - "--yes"
 
 docker_manifests:
   - name_template: "ghcr.io/SaferPlace/saferplace:{{ .Version }}"
